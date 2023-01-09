@@ -64,10 +64,10 @@ export const RewardsInfo = ({ stakingPoolAddress }: RewardsInfoProps) => {
       <CardBody>
         <Stack divider={<StackDivider />} spacing="4">
           <Box>
-            <Text pt="2" fontSize="sm">
+            <Text fontSize="sm">
               <strong>Staking Pool Address: </strong>
               <a
-                href={`https://explorer.aptoslabs.com/account/${stakingPoolAddress}/resources`}
+                href={`https://explorer.aptoslabs.com/account/${stakingPoolAddress}`}
               >
                 {getShortAddress(stakingPoolAddress)}
               </a>

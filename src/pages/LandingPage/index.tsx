@@ -116,7 +116,11 @@ export const LandingPage = () => {
                 placeholder="0x96daeefd..."
               />
             </InputGroup>
-            {prompt ? <Text p={3} textAlign={"center"}>{prompt}</Text> : null}
+            {prompt ? (
+              <Text p={3} textAlign={"center"}>
+                {prompt}
+              </Text>
+            ) : null}
           </Stack>
         </Box>
       </Center>

@@ -27,7 +27,7 @@ const TimelineCard = ({
 }: TimelineCardProps) => {
   return (
     <Card margin={3}>
-      <CardHeader>
+      <CardHeader paddingBottom={0}>
         <Flex>
           <Heading size="sm">{getDatetimePretty(Number(unixTimeSecs))}</Heading>
           <Spacer />

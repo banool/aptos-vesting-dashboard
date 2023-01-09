@@ -1,6 +1,7 @@
 import { Box, Center, Flex, Heading, Text } from "@chakra-ui/react";
 import { useGetAccountResource } from "../../api/hooks/useGetAccountResource";
 import { RewardsInfo } from "../../components/RewardsInfo";
+import { VestingContractInfo } from "../../components/VestingContractInfo";
 import { VestingTimeline } from "../../components/VestingTimeline";
 import { octaToApt } from "../../utils";
 
@@ -91,17 +92,35 @@ export const Body = ({
           <Heading p={5} textAlign={"center"}>
             Vesting Schedule
           </Heading>
-          <Center>
-            {additionalInfoMessage ? (
-              <Text textAlign={"center"} paddingBottom={5}>
-                {additionalInfoMessage}
-              </Text>
-            ) : null}
-          </Center>
+          <Center></Center>
           <VestingTimeline
             data={data}
             stakerGrantAmountApt={stakerGrantAmountApt}
           />
+        </Box>
+        <Box w={"33%"} p={5}>
+          <Heading p={5} textAlign={"center"}>
+            Vesting Contract
+          </Heading>
+          <VestingContractInfo
+            vestingContractAddress={vestingContractAddress}
+            resourceData={data}
+          />
+          <Heading p={5} textAlign={"center"}>
+            Beneficiary Info
+          </Heading>
+          {stakerGrantAmountApt ? (
+            <>
+              <Text textAlign={"center"} paddingBottom={5} paddingTop={2}>
+                {`There is ${stakerGrantAmountApt} APT total in this vesting contract for the given beneficiary address.`}
+              </Text>
+            </>
+          ) : null}
+          {additionalInfoMessage ? (
+            <Text textAlign={"center"} paddingBottom={5} paddingTop={2}>
+              {additionalInfoMessage}
+            </Text>
+          ) : null}
         </Box>
         <Box w={"33%"} p={5}>
           <Heading p={5} textAlign={"center"}>

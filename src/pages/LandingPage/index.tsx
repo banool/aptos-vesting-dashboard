@@ -16,11 +16,6 @@ export const LandingPage = () => {
   const [vestingContractAddress, updateVestingContractAddress] = useState("");
   const [beneficiaryAddress, updateBeneficiaryAddress] = useState("");
 
-  const [vestingContractAddressIsValid, updateVestingContractAddressIsValid] =
-    useState(false);
-  const [beneficiaryAddressIsValid, updateBeneficiaryAddressIsValid] =
-    useState(false);
-
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Load up the inital query params if they're valid.
@@ -29,44 +24,41 @@ export const LandingPage = () => {
       "vesting_contract_address",
     );
     if (vestingContractAddressRaw) {
-      handleAddressUpdate(
-        vestingContractAddressRaw,
-        updateVestingContractAddress,
-        updateVestingContractAddressIsValid,
-      );
+      updateVestingContractAddress(vestingContractAddressRaw);
     }
     const beneficiaryAddressRaw = searchParams.get("beneficiary_address");
     if (beneficiaryAddressRaw) {
-      handleAddressUpdate(
-        beneficiaryAddressRaw,
-        updateBeneficiaryAddress,
-        updateBeneficiaryAddressIsValid,
-      );
+      updateBeneficiaryAddress(beneficiaryAddressRaw);
     }
   }, [searchParams]);
 
   // Update the query params if the addresses were updated and they're valid.
   useEffect(() => {
-    let params: any = {};
-    if (vestingContractAddressIsValid) {
-      params.vesting_contract_address = vestingContractAddress;
+    let paramUpdate: any = {};
+    if (isValidAccountAddress(vestingContractAddress)) {
+      console.log("vestingContractAddress", vestingContractAddress);
+      paramUpdate.vesting_contract_address = vestingContractAddress;
     }
-    if (beneficiaryAddressIsValid) {
-      params.beneficiary_address = beneficiaryAddress;
+    console.log("beneficiaryAddress", beneficiaryAddress);
+    if (isValidAccountAddress(beneficiaryAddress)) {
+      paramUpdate.beneficiary_address = beneficiaryAddress;
+      console.log("beneficiaryAddress", beneficiaryAddress);
     }
-    setSearchParams(params);
+    console.log("new params", paramUpdate);
+    setSearchParams((prev) => {
+      return { ...prev, ...paramUpdate };
+    });
   }, [
     vestingContractAddress,
     beneficiaryAddress,
-    vestingContractAddressIsValid,
-    beneficiaryAddressIsValid,
+    searchParams,
     setSearchParams,
   ]);
 
   let prompt = null;
-  if (!vestingContractAddressIsValid) {
+  if (!isValidAccountAddress(vestingContractAddress)) {
     if (vestingContractAddress === "") {
-      prompt = "Please enter a vesting contract address (0x + 64 chars)";
+      prompt = "Please enter a vesting contract address (0x + up to 64 chars)";
     } else if (vestingContractAddress.length > 0) {
       prompt = "Keep typing!";
     } else {
@@ -74,30 +66,17 @@ export const LandingPage = () => {
     }
   }
 
-  const handleAddressUpdate = (
-    newValue: string,
-    updateValue: React.Dispatch<React.SetStateAction<string>>,
-    updateIsValid: React.Dispatch<React.SetStateAction<boolean>>,
-  ) => {
-    updateValue(newValue);
-    updateIsValid(isValidAccountAddress(newValue));
-  };
-
   return (
     <Box>
       <Center>
-        <Box w={"60%"} p={10}>
+        <Box w={"65%"} p={10}>
           <Stack gap="5">
             <InputGroup>
               <InputLeftAddon minW="175px" children="Vesting contract" />
               <Input
                 value={vestingContractAddress}
                 onChange={(event) =>
-                  handleAddressUpdate(
-                    event.target.value,
-                    updateVestingContractAddress,
-                    updateVestingContractAddressIsValid,
-                  )
+                  updateVestingContractAddress(event.target.value)
                 }
                 placeholder="0x3c3b0d0f..."
               />
@@ -107,11 +86,7 @@ export const LandingPage = () => {
               <Input
                 value={beneficiaryAddress}
                 onChange={(event) =>
-                  handleAddressUpdate(
-                    event.target.value,
-                    updateBeneficiaryAddress,
-                    updateBeneficiaryAddressIsValid,
-                  )
+                  updateBeneficiaryAddress(event.target.value)
                 }
                 placeholder="0x96daeefd..."
               />
@@ -124,7 +99,7 @@ export const LandingPage = () => {
           </Stack>
         </Box>
       </Center>
-      {vestingContractAddressIsValid ? (
+      {isValidAccountAddress(vestingContractAddress) ? (
         <Body
           vestingContractAddress={vestingContractAddress}
           beneficiaryAddress={beneficiaryAddress}

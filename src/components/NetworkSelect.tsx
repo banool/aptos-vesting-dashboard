@@ -39,12 +39,14 @@ export default function NetworkSelect() {
       // Only show the "feature" param in the url when it's not "prod",
       // we don't want the users to know the existence of the "feature" param
       if (feature_name !== defaultFeatureName) {
+        console.log("network A");
         setSearchParams((prev) => {
-          return { network: network_name, feature: feature_name, ...prev };
+          return { ...prev, network: network_name, feature: feature_name };
         });
       } else {
+        console.log("network B");
         setSearchParams((prev) => {
-          return { network: network_name, ...prev };
+          return { ...prev, network: network_name };
         });
       }
       dispatch({ network_name, network_value, feature_name });

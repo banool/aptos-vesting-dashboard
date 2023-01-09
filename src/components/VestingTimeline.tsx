@@ -1,4 +1,4 @@
-import { numberToFractionString } from "../utils";
+import { divideManyTimes, numberToFractionString } from "../utils";
 import { Timeline } from "./Timeline";
 
 export type VestingTimelineItem = {
@@ -19,16 +19,20 @@ export const VestingTimeline = ({
   const startTimestampSecs = BigInt(vestingSchedule.start_timestamp_secs);
   const periodDuration = BigInt(vestingSchedule.period_duration);
 
+  // https://github.com/facebook/create-react-app/issues/6907#issuecomment-778178677
+  // https://github.com/facebook/create-react-app/issues/11705
+  const exponent = Math.pow(2, 32);
+
   // Build the first set of items from the on chain data.
   let timeTracker = startTimestampSecs;
   let items: VestingTimelineItem[] = [];
   for (const item of vestingSchedule.schedule) {
     // https://stackoverflow.com/a/54409977/3846032
     const rawValue = BigInt(item.value);
-    const exponent = 2n ** 32n;
-    const precision = 100_000_000n;
+    const precision = 100_000n;
     const fraction =
-      Number((rawValue * precision) / exponent) / Number(precision);
+      Number((rawValue * precision) / BigInt(exponent)) / Number(precision);
+
     items.push({
       fraction,
       unixTimeSecs: timeTracker,
@@ -44,6 +48,7 @@ export const VestingTimeline = ({
   const remainingFraction = 1 - totalFractionSoFar;
   const lastFraction = items[items.length - 1].fraction;
   const numberOfEventsToAdd = remainingFraction / lastFraction;
+  console.log("numberOfEventsToAdd", numberOfEventsToAdd);
   let latestUnixtime = items[items.length - 1].unixTimeSecs;
   for (let i = 0; i < numberOfEventsToAdd; i++) {
     items.push({

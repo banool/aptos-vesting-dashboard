@@ -35,6 +35,8 @@ export const Body = ({
     );
   }
 
+  console.log(accountResource);
+
   if (accountResource === undefined) {
     return (
       <Text p={6} textAlign={"center"}>
@@ -80,7 +82,7 @@ export const Body = ({
   return (
     <Box>
       <Center>
-        <Text p={5} textAlign={"center"}>
+        <Text p={3} textAlign={"center"}>
           All timestamps relative to {tz}.
         </Text>
       </Center>

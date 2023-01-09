@@ -178,3 +178,15 @@ export function numberToFractionString(n: number): string {
 export function getShortAddress(addr: string): string {
   return addr.slice(0, 6) + "..." + addr.slice(-4);
 }
+
+export function divideManyTimes(
+  value: bigint,
+  divideBy: bigint,
+  numTimes: number,
+): bigint {
+  let out = value;
+  for (let i = 0; i < numTimes; i++) {
+    out /= divideBy;
+  }
+  return out;
+}

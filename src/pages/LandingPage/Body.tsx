@@ -36,8 +36,6 @@ export const Body = ({
     );
   }
 
-  console.log(accountResource);
-
   if (accountResource === undefined) {
     return (
       <Text p={6} textAlign={"center"}>
@@ -142,7 +140,6 @@ export const Body = ({
 // the address given.
 function getStakerAccountAddress(resourceData: any, address: string): string {
   const beneficiaries = resourceData.beneficiaries.data;
-  console.log(`beneficiaries: ${JSON.stringify(beneficiaries)}`);
   for (const item of beneficiaries) {
     if (item.value === address) {
       return item.key;

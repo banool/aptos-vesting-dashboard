@@ -47,8 +47,8 @@ export const VestingTimeline = ({
     .reduce((partialSum, a) => partialSum + a, 0);
   const remainingFraction = 1 - totalFractionSoFar;
   const lastFraction = items[items.length - 1].fraction;
-  const numberOfEventsToAdd = remainingFraction / lastFraction;
-  console.log("numberOfEventsToAdd", numberOfEventsToAdd);
+  // TODO: I think this math may be incorrect, double check.
+  const numberOfEventsToAdd = Math.floor(remainingFraction / lastFraction);
   let latestUnixtime = items[items.length - 1].unixTimeSecs;
   for (let i = 0; i < numberOfEventsToAdd; i++) {
     items.push({

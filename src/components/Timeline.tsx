@@ -1,38 +1,66 @@
-import * as React from "react";
 import {
-  ChakraProvider,
   Box,
   Text,
-  Link,
   Card,
-  VStack,
-  Code,
-  Grid,
-  theme,
+  CardHeader,
+  Heading,
+  CardBody,
+  Center,
+  Divider,
 } from "@chakra-ui/react";
+import { getDatetimePretty } from "../utils";
 
-type TimelineItems = {
+export type TimelineItem = {
   title: string;
-  unixTimeSecs: number;
+  unixTimeSecs: bigint;
 };
 
-type TimelineProps = {
+interface TimelineCardProps {
+  item: TimelineItem;
+}
+
+const TimelineCard = ({ item: { title, unixTimeSecs } }: TimelineCardProps) => {
+  return (
+    <Card margin={3}>
+      <CardHeader>
+        <Heading size="sm">{title}</Heading>
+      </CardHeader>
+      <CardBody>
+        <Text>{getDatetimePretty(Number(unixTimeSecs))}</Text>
+      </CardBody>
+    </Card>
+  );
+};
+
+export type TimelineProps = {
   // The order here is not respected, we just sort by unixTimeSecs.
-  items: TimelineItems[];
+  items: TimelineItem[];
 };
 
 export const Timeline = ({ items }: TimelineProps) => {
+  // From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt.
+  items = items.sort((a, b) =>
+    a.unixTimeSecs < b.unixTimeSecs
+      ? -1
+      : a.unixTimeSecs > b.unixTimeSecs
+      ? 1
+      : 0
+  );
+
   // Returns a vertical timeline of items, where each item is a card with a
   // small vertical line between them. Each card should have the title and
   // then as the subtitle a pretty formatted date.
-  return (
-    <VStack>
-      {items.map((item) => (
-        <Card>
-          <Text>{item.title}</Text>
-          <Text>{item.unixTimeSecs}</Text>
-        </Card>
-      ))}
-    </VStack>
-  );
+  let components = [<TimelineCard key={0} item={items[0]} />];
+  let key = 1;
+  for (const item of items.slice(1)) {
+    components.push(
+      <Center key={key} height="25px">
+        <Divider borderWidth="1px" orientation="vertical" />
+      </Center>
+    );
+    components.push(<TimelineCard key={key + 1} item={item} />);
+    key += 2;
+  }
+
+  return <Box overflowY={"auto"}>{components}</Box>;
 };

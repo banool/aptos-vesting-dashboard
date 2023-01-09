@@ -19,6 +19,7 @@ specifiers:
   aptos: ^1.4.0
   chroma-js: ^2.4.2
   connected-react-router: ^6.9.3
+  fraction-unicode: ^1.0.1
   framer-motion: ^6.5.1
   graphql-request: ^5.0.0
   history: ^5.3.0
@@ -57,6 +58,7 @@ dependencies:
   aptos: 1.5.0
   chroma-js: 2.4.2
   connected-react-router: 6.9.3_owrhpjkewatihcekejl66frdka
+  fraction-unicode: 1.0.1
   framer-motion: 6.5.1_biqbaboplfbrettd7655fr4n2y
   graphql-request: 5.1.0_graphql@16.6.0
   history: 5.3.0
@@ -6799,6 +6801,10 @@ packages:
   /forwarded/0.2.0:
     resolution: {integrity: sha512-buRG0fpBtRHSTCOASe6hD258tEubFoRLb4ZNA6NxMVHNw2gOcwHo9wyablzMzOA5z9xA9L1KNjk/Nt6MT9aYow==}
     engines: {node: '>= 0.6'}
+    dev: false
+
+  /fraction-unicode/1.0.1:
+    resolution: {integrity: sha512-ApZkIHoL4S/ipdH863xEzPzIsd38PPhh72IaZnEPFM4kbXEhtdbSjREnlIikdWOCKRH7+04FRRKximeLb1RKSA==}
     dev: false
 
   /fraction.js/4.2.0:

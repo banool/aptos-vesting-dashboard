@@ -7,7 +7,7 @@ import { useGlobalState } from "../../GlobalState";
 type useGetAccountResourceResponse = {
   accountResource: Types.MoveResource | undefined;
   isLoading: boolean;
-  isError: boolean;
+  error: ResponseError | null;
   refetch: () => Promise<UseQueryResult>;
 };
 
@@ -25,11 +25,11 @@ export function useGetAccountResource(
     { refetchOnWindowFocus: false }
   );
 
-  const { isLoading, isError, refetch } = accountResourcesResult;
+  const { isLoading, error, refetch } = accountResourcesResult;
 
   const accountResource = accountResourcesResult.data?.find(
     (r) => r.type === resource
   );
 
-  return { accountResource, isLoading, isError, refetch };
+  return { accountResource, isLoading, error, refetch };
 }

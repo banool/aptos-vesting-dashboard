@@ -78,3 +78,68 @@ export function toTitleCase(str: string) {
     return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
   });
 }
+
+export function isValidAccountAddress(accountAddr: string): boolean {
+  // account address is 0x{64 hex characters}
+  // with multiple options - 0X, 0x001, 0x1, 0x01
+  // can start with that and see if any fails to parsing
+  return (
+    /^(0[xX])?[a-fA-F0-9]{1,64}$/.test(accountAddr) && accountAddr.length == 66
+  );
+}
+
+export function getDatetimePretty(unixtimeSecs: number) {
+  var a = new Date(unixtimeSecs * 1000);
+  var months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+  var year = a.getFullYear();
+  var month = months[a.getMonth()];
+  var date = a.getDate();
+  var hour = a.getHours();
+  var min = a.getMinutes() < 10 ? "0" + a.getMinutes() : a.getMinutes();
+  var sec = a.getSeconds() < 10 ? "0" + a.getSeconds() : a.getSeconds();
+  var time =
+    date + " " + month + " " + year + " " + hour + ":" + min + ":" + sec;
+  return time;
+}
+
+// From https://stackoverflow.com/a/7579799.
+export function getDurationPretty(durationSecs: number) {
+  var hours: any = Math.floor(durationSecs / 3600);
+  var minutes: any = Math.floor((durationSecs - hours * 3600) / 60);
+  var seconds: any = durationSecs - hours * 3600 - minutes * 60;
+  var time = "";
+
+  if (hours !== 0) {
+    time = hours + " hours ";
+  }
+  if (minutes !== 0 || time !== "") {
+    minutes = minutes < 10 && time !== "" ? "0" + minutes : String(minutes);
+    time += minutes + " minutes ";
+  }
+  if (time === "") {
+    time = seconds + " seconds";
+  } else {
+    time += seconds < 10 ? "0" + seconds : String(seconds) + " seconds";
+  }
+  return time;
+}
+
+export const OCTA_NUMBER: number = 8 as const;
+export const OCTA_NEGATIVE_EXPONENT = 10 ** -OCTA_NUMBER;
+export const OCTA_POSITIVE_EXPONENT = 10 ** OCTA_NUMBER;
+
+export const aptToOcta = (octa: number) => octa * OCTA_POSITIVE_EXPONENT;
+export const octaToApt = (apt: bigint) => apt / BigInt(OCTA_POSITIVE_EXPONENT);

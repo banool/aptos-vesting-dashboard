@@ -1,15 +1,31 @@
 import React from "react";
-import { Box, Flex, Heading, IconButton, Spacer } from "@chakra-ui/react";
+import { Box, Flex, Heading, IconButton, Spacer, Text } from "@chakra-ui/react";
 import { ColorModeSwitcher } from "../components/ColorModeSwitcher";
 import NetworkSelect from "../components/NetworkSelect";
+import { useGetAptToUsd } from "../api/hooks/useGetAptToUsd";
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
+// TODO: Figure out how to make IconButton padding for GitHub button the same
+// as the color switcher button.
 export default function MainLayout({ children }: LayoutProps) {
-  // TODO: Figure out how to make IconButton padding for GitHub button the same
-  // as the color switcher button.
+  const { isLoading, aptToUsd, error } = useGetAptToUsd();
+
+  let headerMiddle = null;
+  if (isLoading) {
+    headerMiddle = <Text>Loading APT price...</Text>;
+  }
+  if (aptToUsd) {
+    headerMiddle = <Text>{`1 APT = ${aptToUsd} USD`}</Text>;
+  }
+  if (!isLoading && aptToUsd === undefined) {
+    headerMiddle = <Text>Error loading APT price, see console logs</Text>;
+    console.log("Error loading APT price:");
+    console.log(error);
+  }
+
   return (
     <Box>
       <Box paddingTop={5} paddingBottom={5} paddingLeft={8} paddingRight={8}>
@@ -17,6 +33,8 @@ export default function MainLayout({ children }: LayoutProps) {
           <Box>
             <Heading size="md">Aptos Vesting Dashboard</Heading>
           </Box>
+          <Spacer />
+          {headerMiddle}
           <Spacer />
           <a href="https://github.com/banool/aptos-vesting-dashboard">
             <IconButton

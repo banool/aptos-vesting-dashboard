@@ -188,3 +188,10 @@ export function divideManyTimes(
   }
   return out;
 }
+
+export function formatUsdAmount(usdAmount: number): string {
+  return `$${usdAmount.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}

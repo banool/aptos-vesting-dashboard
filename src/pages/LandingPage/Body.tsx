@@ -1,9 +1,10 @@
 import { Box, Center, Flex, Heading, Text } from "@chakra-ui/react";
 import { useGetAccountResource } from "../../api/hooks/useGetAccountResource";
+import { useGetAptToUsd } from "../../api/hooks/useGetAptToUsd";
 import { RewardsInfo } from "../../components/RewardsInfo";
 import { VestingContractInfo } from "../../components/VestingContractInfo";
 import { VestingTimeline } from "../../components/VestingTimeline";
-import { octaToApt } from "../../utils";
+import { formatUsdAmount, octaToApt } from "../../utils";
 
 type BodyProps = {
   vestingContractAddress: string;
@@ -18,6 +19,11 @@ export const Body = ({
     vestingContractAddress,
     "0x1::vesting::VestingContract",
   );
+
+  // I have verified that this only gets called once, even if you use this hook
+  // in multiple places throughout the code. There must be some sensible default
+  // caching mechanism in place.
+  const { aptToUsd } = useGetAptToUsd();
 
   if (error) {
     return (
@@ -56,6 +62,10 @@ export const Body = ({
   const stakerGrantAmountApt = stakerGrantAmount
     ? octaToApt(stakerGrantAmount)
     : null;
+  const stakerGrantAmountUsd =
+    stakerGrantAmountApt && aptToUsd
+      ? Number(stakerGrantAmountApt) * aptToUsd
+      : null;
 
   let additionalInfoMessage = null;
   if (beneficiaryAddress === "") {
@@ -77,6 +87,19 @@ export const Body = ({
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   const stakingPoolAddress: string | undefined = data.staking.pool_address;
+
+  let stakerGrantTotalComponent = null;
+  if (stakerGrantAmountApt) {
+    let usdText = "";
+    if (stakerGrantAmountUsd) {
+      usdText = ` (${formatUsdAmount(stakerGrantAmountUsd)})`;
+    }
+    stakerGrantTotalComponent = (
+      <Text textAlign={"center"} paddingBottom={5} paddingTop={2}>
+        {`There is ${stakerGrantAmountApt} APT${usdText} total in this vesting contract for the given beneficiary address.`}
+      </Text>
+    );
+  }
 
   return (
     <Box>
@@ -110,7 +133,9 @@ export const Body = ({
           {stakerGrantAmountApt ? (
             <>
               <Text textAlign={"center"} paddingBottom={5} paddingTop={2}>
-                {`There is ${stakerGrantAmountApt} APT total in this vesting contract for the given beneficiary address.`}
+                {`There is ${stakerGrantAmountApt} APT (${formatUsdAmount(
+                  stakerGrantAmountUsd!,
+                )}) total in this vesting contract for the given beneficiary address.`}
               </Text>
             </>
           ) : null}

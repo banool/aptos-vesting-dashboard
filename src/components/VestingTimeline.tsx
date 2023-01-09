@@ -1,4 +1,9 @@
-import { divideManyTimes, numberToFractionString } from "../utils";
+import { useGetAptToUsd } from "../api/hooks/useGetAptToUsd";
+import {
+  divideManyTimes,
+  formatUsdAmount,
+  numberToFractionString,
+} from "../utils";
 import { Timeline } from "./Timeline";
 
 export type VestingTimelineItem = {
@@ -15,6 +20,8 @@ export const VestingTimeline = ({
   data,
   stakerGrantAmountApt,
 }: VestingTimelineProps) => {
+  const { aptToUsd } = useGetAptToUsd();
+
   const vestingSchedule = data.vesting_schedule;
   const startTimestampSecs = BigInt(vestingSchedule.start_timestamp_secs);
   const periodDuration = BigInt(vestingSchedule.period_duration);
@@ -64,7 +71,10 @@ export const VestingTimeline = ({
       ? (Number(stakerGrantAmountApt) * item.fraction).toFixed(2)
       : null;
     const fraction = numberToFractionString(item.fraction);
-    const amountString = amountApt !== null ? `${amountApt} APT` : "";
+    let amountString = amountApt !== null ? `${amountApt} APT` : "";
+    if (aptToUsd !== undefined) {
+      amountString += ` - ${formatUsdAmount(Number(amountApt) * aptToUsd)}`;
+    }
     timelineItems.push({
       title: fraction,
       body: amountString,

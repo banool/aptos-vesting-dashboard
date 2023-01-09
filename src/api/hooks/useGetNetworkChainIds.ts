@@ -8,19 +8,25 @@ import {
 
 const TTL = 3600000; // 1 hour
 
-export function useGetChainIdCached(networkName: NetworkName): string | null {
-  return getLocalStorageWithExpiry(`${networkName}ChainId`);
-}
+export function useGetChainId(networkName: NetworkName): string | null {
+  let chainIdFromCache = getLocalStorageWithExpiry(`${networkName}ChainId`);
 
-export function useGetChainIdAndCache(networkName: NetworkName): string | null {
-  const { data } = useQuery(["ledgerInfo", networks[networkName]], () => {
-    try {
-      return getLedgerInfoWithoutResponseError(networks[networkName]);
-    } catch (e) {
-      console.log(`Error fetching chainId for ${networkName}: ${e}`);
-      return null;
-    }
-  });
+  const { data } = useQuery(
+    ["ledgerInfo", networks[networkName]],
+    () => {
+      try {
+        return getLedgerInfoWithoutResponseError(networks[networkName]);
+      } catch (e) {
+        console.log(`Error fetching chainId for ${networkName}: ${e}`);
+        return null;
+      }
+    },
+    { enabled: chainIdFromCache === null },
+  );
+
+  if (chainIdFromCache !== null) {
+    return chainIdFromCache;
+  }
 
   const chainId = data?.chain_id ? data?.chain_id.toString() : null;
 

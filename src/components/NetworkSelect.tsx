@@ -3,10 +3,7 @@ import { Select, Box } from "@chakra-ui/react";
 import { defaultFeatureName, NetworkName, networks } from "../constants";
 import { useGlobalState } from "../GlobalState";
 import { useSearchParams } from "react-router-dom";
-import {
-  useGetChainIdCached,
-  useGetChainIdAndCache,
-} from "../api/hooks/useGetNetworkChainIds";
+import { useGetChainId } from "../api/hooks/useGetNetworkChainIds";
 import { toTitleCase } from "../utils";
 
 function NetworkAndChainIdCached({
@@ -20,28 +17,12 @@ function NetworkAndChainIdCached({
 }
 
 function NetworkAndChainId({ networkName }: { networkName: string }) {
-  const chainId = useGetChainIdAndCache(networkName as NetworkName);
+  const chainId = useGetChainId(networkName as NetworkName);
 
   const out = chainId ? (
     <NetworkAndChainIdCached networkName={networkName} chainId={chainId} />
   ) : null;
   return out;
-}
-
-function NetworkMenuItem({ networkName }: { networkName: string }) {
-  const chainIdCached = useGetChainIdCached(networkName as NetworkName);
-
-  return chainIdCached ? (
-    <NetworkAndChainIdCached
-      networkName={networkName}
-      chainId={chainIdCached}
-    />
-  ) : (
-    // This return style is necessary so we can catch the null return from
-    // NetworkAndChainId later (if it returns null).
-    // https://stackoverflow.com/a/59566588/3846032
-    NetworkAndChainId({ networkName: networkName })
-  );
 }
 
 export default function NetworkSelect() {
@@ -82,7 +63,7 @@ export default function NetworkSelect() {
 
   let options = [];
   for (const networkName in networks) {
-    const item = NetworkMenuItem({ networkName: networkName });
+    const item = NetworkAndChainId({ networkName: networkName });
     if (item === null) {
       continue;
     }

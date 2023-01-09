@@ -6,7 +6,7 @@ import {
   Stack,
   StackDivider,
 } from "@chakra-ui/react";
-import { getDatetimePretty, getShortAddress } from "../utils";
+import { getShortAddress } from "../utils";
 
 export type RewardsInfoProps = {
   vestingContractAddress: string;

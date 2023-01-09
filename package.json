@@ -46,10 +46,16 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
+    "lint": "eslint 'src/**/*.{ts,tsx}'",
     "fmt": "prettier --write 'src/**/*.(ts|tsx)'"
   },
   "eslintConfig": {
-    "extends": "react-app"
+    "extends": "react-app",
+    "rules": {
+      "@typescript-eslint/no-unused-vars": "off",
+      "no-throw-literal": "off",
+      "no-multi-str": "off"
+    }
   },
   "browserslist": {
     "production": [

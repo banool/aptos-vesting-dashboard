@@ -1,9 +1,8 @@
-import { Box, Text } from "@chakra-ui/react";
+import { Box, Center, Flex, Heading, Text } from "@chakra-ui/react";
 import { useGetAccountResource } from "../../api/hooks/useGetAccountResource";
-import {
-  VestingTimeline,
-  VestingTimelineItem,
-} from "../../components/VestingTimeline";
+import { RewardsInfo } from "../../components/RewardsInfo";
+import { VestingTimeline } from "../../components/VestingTimeline";
+import { octaToApt } from "../../utils";
 
 type BodyProps = {
   vestingContractAddress: string;
@@ -16,7 +15,7 @@ export const Body = ({
 }: BodyProps) => {
   const { isLoading, accountResource, error } = useGetAccountResource(
     vestingContractAddress,
-    "0x1::vesting::VestingContract"
+    "0x1::vesting::VestingContract",
   );
 
   if (error) {
@@ -47,33 +46,18 @@ export const Body = ({
   // Pull out relevant info from the resource from the account with the vesting
   // contract.
   const data = accountResource.data as any;
-  const vestingSchedule = data.vesting_schedule;
-  const startTimestampSecs = BigInt(vestingSchedule.start_timestamp_secs);
-  const periodDuration = BigInt(vestingSchedule.period_duration);
 
   // Determine additional information if a beneficiary address was given.
   const stakerAccountAddress = beneficiaryAddress
     ? getStakerAccountAddress(data, beneficiaryAddress)
     : null;
   const stakerGrantAmount = getStakerGrantAmount(data, stakerAccountAddress);
-
-  let timeTracker = startTimestampSecs;
-  console.log("startTimestampSecs: ", startTimestampSecs);
-  console.log("periodDuration: ", periodDuration);
-  let items: VestingTimelineItem[] = [];
-  for (const item of vestingSchedule.schedule) {
-    // TODO: Figure out proper fraction.
-    const rawFraction = BigInt(item.value);
-    const fraction = 1 / vestingSchedule.schedule.length;
-    items.push({
-      fraction,
-      unixTimeSecs: timeTracker,
-    });
-    timeTracker += periodDuration;
-  }
+  const stakerGrantAmountApt = stakerGrantAmount
+    ? octaToApt(stakerGrantAmount)
+    : null;
 
   let additionalInfoMessage = null;
-  if (beneficiaryAddress == "") {
+  if (beneficiaryAddress === "") {
     additionalInfoMessage =
       "\
         Enter a beneficiary address to see information about how much will vest \
@@ -89,17 +73,43 @@ export const Body = ({
     ";
   }
 
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  const stakingPoolAddress: string | undefined = data.staking.pool_address;
+
   return (
-    <Box p={10}>
-      {additionalInfoMessage ? (
-        <Text textAlign={"center"} paddingBottom={5}>
-          {additionalInfoMessage}
+    <Box>
+      <Center>
+        <Text p={5} textAlign={"center"}>
+          All timestamps relative to {tz}.
         </Text>
-      ) : null}
-      <VestingTimeline
-        items={items}
-        stakerGrantAmountOcta={stakerGrantAmount}
-      />
+      </Center>
+      <Flex>
+        <Box w={"33%"} p={5}>
+          <Heading p={5} textAlign={"center"}>
+            Vesting Schedule
+          </Heading>
+          <Center>
+            {additionalInfoMessage ? (
+              <Text textAlign={"center"} paddingBottom={5}>
+                {additionalInfoMessage}
+              </Text>
+            ) : null}
+          </Center>
+          <VestingTimeline
+            data={data}
+            stakerGrantAmountApt={stakerGrantAmountApt}
+          />
+        </Box>
+        <Box w={"33%"} p={5}>
+          <Heading p={5} textAlign={"center"}>
+            Rewards
+          </Heading>
+          {stakingPoolAddress ? (
+            <RewardsInfo stakingPoolAddress={stakingPoolAddress} />
+          ) : null}
+        </Box>
+      </Flex>
     </Box>
   );
 };
@@ -122,14 +132,14 @@ function getStakerAccountAddress(resourceData: any, address: string): string {
 
 function getStakerGrantAmount(
   resourceData: any,
-  stakerAddress: string | null
+  stakerAddress: string | null,
 ): bigint | null {
   if (stakerAddress === undefined) {
     return null;
   }
   const shares = resourceData.grant_pool.shares.data;
   const amount: string | undefined = shares.find(
-    (item: any) => item.key == stakerAddress
+    (item: any) => item.key === stakerAddress,
   )?.value;
   if (amount === undefined) {
     return null;

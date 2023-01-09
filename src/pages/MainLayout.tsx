@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Flex, Grid, Heading, Spacer } from "@chakra-ui/react";
+import { Box, Flex, Heading, Spacer } from "@chakra-ui/react";
 import { ColorModeSwitcher } from "../components/ColorModeSwitcher";
 import NetworkSelect from "../components/NetworkSelect";
 

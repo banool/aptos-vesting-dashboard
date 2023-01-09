@@ -7,11 +7,14 @@ import {
   CardBody,
   Center,
   Divider,
+  Spacer,
+  Flex,
 } from "@chakra-ui/react";
 import { getDatetimePretty } from "../utils";
 
 export type TimelineItem = {
   title: string;
+  body: string;
   unixTimeSecs: bigint;
 };
 
@@ -19,14 +22,20 @@ interface TimelineCardProps {
   item: TimelineItem;
 }
 
-const TimelineCard = ({ item: { title, unixTimeSecs } }: TimelineCardProps) => {
+const TimelineCard = ({
+  item: { title, body, unixTimeSecs },
+}: TimelineCardProps) => {
   return (
     <Card margin={3}>
       <CardHeader>
-        <Heading size="sm">{title}</Heading>
+        <Flex>
+          <Heading size="sm">{getDatetimePretty(Number(unixTimeSecs))}</Heading>
+          <Spacer />
+          <Heading size="md">{title}</Heading>
+        </Flex>
       </CardHeader>
       <CardBody>
-        <Text>{getDatetimePretty(Number(unixTimeSecs))}</Text>
+        <Text textAlign={"center"}>{body}</Text>
       </CardBody>
     </Card>
   );
@@ -44,7 +53,7 @@ export const Timeline = ({ items }: TimelineProps) => {
       ? -1
       : a.unixTimeSecs > b.unixTimeSecs
       ? 1
-      : 0
+      : 0,
   );
 
   // Returns a vertical timeline of items, where each item is a card with a
@@ -56,7 +65,7 @@ export const Timeline = ({ items }: TimelineProps) => {
     components.push(
       <Center key={key} height="25px">
         <Divider borderWidth="1px" orientation="vertical" />
-      </Center>
+      </Center>,
     );
     components.push(<TimelineCard key={key + 1} item={item} />);
     key += 2;

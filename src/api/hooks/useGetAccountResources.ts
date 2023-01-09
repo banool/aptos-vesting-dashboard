@@ -5,7 +5,7 @@ import { ResponseError } from "../../api/client";
 import { useGlobalState } from "../../GlobalState";
 
 export function useGetAccountResources(
-  address: string
+  address: string,
 ): UseQueryResult<Types.MoveResource[], ResponseError> {
   const [state, _setState] = useGlobalState();
 
@@ -13,7 +13,7 @@ export function useGetAccountResources(
     Array<Types.MoveResource>,
     ResponseError
   >(["accountResources", { address }, state.network_value], () =>
-    getAccountResources({ address }, state.network_value)
+    getAccountResources({ address }, state.network_value),
   );
 
   return accountResourcesResult;

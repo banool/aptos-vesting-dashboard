@@ -1,8 +1,7 @@
 import { useEffect } from "react";
-import { FormControl, Select, Box } from "@chakra-ui/react";
+import { Select, Box } from "@chakra-ui/react";
 import { defaultFeatureName, NetworkName, networks } from "../constants";
 import { useGlobalState } from "../GlobalState";
-import { useTheme } from "@chakra-ui/react";
 import { useSearchParams } from "react-router-dom";
 import {
   useGetChainIdCached,
@@ -48,7 +47,6 @@ function NetworkMenuItem({ networkName }: { networkName: string }) {
 export default function NetworkSelect() {
   const [state, dispatch] = useGlobalState();
   const [searchParams, setSearchParams] = useSearchParams();
-  const theme = useTheme();
 
   function maybeSetNetwork(networkNameString: string | null) {
     if (!networkNameString || state.network_name === networkNameString) return;
@@ -60,9 +58,13 @@ export default function NetworkSelect() {
       // Only show the "feature" param in the url when it's not "prod",
       // we don't want the users to know the existence of the "feature" param
       if (feature_name !== defaultFeatureName) {
-        setSearchParams({ network: network_name, feature: feature_name });
+        setSearchParams((prev) => {
+          return { network: network_name, feature: feature_name, ...prev };
+        });
       } else {
-        setSearchParams({ network: network_name });
+        setSearchParams((prev) => {
+          return { network: network_name, ...prev };
+        });
       }
       dispatch({ network_name, network_value, feature_name });
     }
@@ -87,7 +89,7 @@ export default function NetworkSelect() {
     options.push(
       <option key={networkName} value={networkName}>
         {item}
-      </option>
+      </option>,
     );
   }
 

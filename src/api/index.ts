@@ -2,7 +2,7 @@ import { AptosClient, Types } from "aptos";
 import { withResponseError } from "./client";
 
 export function getLedgerInfoWithoutResponseError(
-  nodeUrl: string
+  nodeUrl: string,
 ): Promise<Types.IndexResponse> {
   const client = new AptosClient(nodeUrl);
   return client.getLedgerInfo();
@@ -10,7 +10,7 @@ export function getLedgerInfoWithoutResponseError(
 
 export function getAccountResources(
   requestParameters: { address: string; ledgerVersion?: number },
-  nodeUrl: string
+  nodeUrl: string,
 ): Promise<Types.MoveResource[]> {
   const client = new AptosClient(nodeUrl);
   const { address, ledgerVersion } = requestParameters;
@@ -19,7 +19,7 @@ export function getAccountResources(
     ledgerVersionBig = BigInt(ledgerVersion);
   }
   return withResponseError(
-    client.getAccountResources(address, { ledgerVersion: ledgerVersionBig })
+    client.getAccountResources(address, { ledgerVersion: ledgerVersionBig }),
   );
 }
 
@@ -29,7 +29,7 @@ export function getAccountResource(
     resourceType: string;
     ledgerVersion?: number;
   },
-  nodeUrl: string
+  nodeUrl: string,
 ): Promise<Types.MoveResource> {
   const client = new AptosClient(nodeUrl);
   const { address, resourceType, ledgerVersion } = requestParameters;
@@ -40,6 +40,6 @@ export function getAccountResource(
   return withResponseError(
     client.getAccountResource(address, resourceType, {
       ledgerVersion: ledgerVersionBig,
-    })
+    }),
   );
 }

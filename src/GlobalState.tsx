@@ -50,13 +50,13 @@ function reducer(state: GlobalState, newValue: GlobalState): GlobalState {
   if (newValue.network_name) {
     localStorage.setItem(
       "selected_network",
-      newValue.network_name.toLowerCase()
+      newValue.network_name.toLowerCase(),
     );
   }
   if (newValue.feature_name) {
     localStorage.setItem(
       "selected_feature",
-      newValue.feature_name.toLowerCase()
+      newValue.feature_name.toLowerCase(),
     );
   }
   return { ...state, ...newValue };
@@ -84,7 +84,7 @@ export const GlobalStateProvider = ({
 
 export const useGlobalState = (): [
   GlobalState,
-  React.Dispatch<GlobalState>
+  React.Dispatch<GlobalState>,
 ] => [
   React.useContext(GlobalStateContext),
   React.useContext(DispatchStateContext),

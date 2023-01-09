@@ -1,19 +1,14 @@
 import {
   Box,
-  Button,
-  Flex,
+  Center,
   Input,
   InputGroup,
   InputLeftAddon,
   Stack,
   Text,
-  useToast,
-  VStack,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useGetAccountResource } from "../../api/hooks/useGetAccountResource";
-import { Timeline } from "../../components/Timeline";
 import { isValidAccountAddress } from "../../utils";
 import { Body } from "./Body";
 
@@ -31,13 +26,13 @@ export const LandingPage = () => {
   // Load up the inital query params if they're valid.
   useEffect(() => {
     const vestingContractAddressRaw = searchParams.get(
-      "vesting_contract_address"
+      "vesting_contract_address",
     );
     if (vestingContractAddressRaw) {
       handleAddressUpdate(
         vestingContractAddressRaw,
         updateVestingContractAddress,
-        updateVestingContractAddressIsValid
+        updateVestingContractAddressIsValid,
       );
     }
     const beneficiaryAddressRaw = searchParams.get("beneficiary_address");
@@ -45,10 +40,10 @@ export const LandingPage = () => {
       handleAddressUpdate(
         beneficiaryAddressRaw,
         updateBeneficiaryAddress,
-        updateBeneficiaryAddressIsValid
+        updateBeneficiaryAddressIsValid,
       );
     }
-  }, []);
+  }, [searchParams]);
 
   // Update the query params if the addresses were updated and they're valid.
   useEffect(() => {
@@ -57,7 +52,7 @@ export const LandingPage = () => {
       params.vesting_contract_address = vestingContractAddress;
     }
     if (beneficiaryAddressIsValid) {
-      params.beneficiary_address = vestingContractAddress;
+      params.beneficiary_address = beneficiaryAddress;
     }
     setSearchParams(params);
   }, [
@@ -65,11 +60,12 @@ export const LandingPage = () => {
     beneficiaryAddress,
     vestingContractAddressIsValid,
     beneficiaryAddressIsValid,
+    setSearchParams,
   ]);
 
   let prompt = null;
   if (!vestingContractAddressIsValid) {
-    if (vestingContractAddress == "") {
+    if (vestingContractAddress === "") {
       prompt = "Please enter a vesting contract address (0x + 64 chars)";
     } else if (vestingContractAddress.length > 0) {
       prompt = "Keep typing!";
@@ -81,45 +77,49 @@ export const LandingPage = () => {
   const handleAddressUpdate = (
     newValue: string,
     updateValue: React.Dispatch<React.SetStateAction<string>>,
-    updateIsValid: React.Dispatch<React.SetStateAction<boolean>>
+    updateIsValid: React.Dispatch<React.SetStateAction<boolean>>,
   ) => {
     updateValue(newValue);
     updateIsValid(isValidAccountAddress(newValue));
   };
 
   return (
-    <Box w={"60%"} p={10}>
-      <Stack gap="5">
-        <InputGroup>
-          <InputLeftAddon minW="175px" children="Vesting contract" />
-          <Input
-            value={vestingContractAddress}
-            onChange={(event) =>
-              handleAddressUpdate(
-                event.target.value,
-                updateVestingContractAddress,
-                updateVestingContractAddressIsValid
-              )
-            }
-            placeholder="0x3c3b0d0f..."
-          />
-        </InputGroup>
-        <InputGroup>
-          <InputLeftAddon minW="175px" children="Beneficiary" />
-          <Input
-            value={beneficiaryAddress}
-            onChange={(event) =>
-              handleAddressUpdate(
-                event.target.value,
-                updateBeneficiaryAddress,
-                updateBeneficiaryAddressIsValid
-              )
-            }
-            placeholder="0x96daeefd..."
-          />
-        </InputGroup>
-        {prompt ? <Text>{prompt}</Text> : null}
-      </Stack>
+    <Box>
+      <Center>
+        <Box w={"60%"} p={10}>
+          <Stack gap="5">
+            <InputGroup>
+              <InputLeftAddon minW="175px" children="Vesting contract" />
+              <Input
+                value={vestingContractAddress}
+                onChange={(event) =>
+                  handleAddressUpdate(
+                    event.target.value,
+                    updateVestingContractAddress,
+                    updateVestingContractAddressIsValid,
+                  )
+                }
+                placeholder="0x3c3b0d0f..."
+              />
+            </InputGroup>
+            <InputGroup>
+              <InputLeftAddon minW="175px" children="Beneficiary" />
+              <Input
+                value={beneficiaryAddress}
+                onChange={(event) =>
+                  handleAddressUpdate(
+                    event.target.value,
+                    updateBeneficiaryAddress,
+                    updateBeneficiaryAddressIsValid,
+                  )
+                }
+                placeholder="0x96daeefd..."
+              />
+            </InputGroup>
+            {prompt ? <Text>{prompt}</Text> : null}
+          </Stack>
+        </Box>
+      </Center>
       {vestingContractAddressIsValid ? (
         <Body
           vestingContractAddress={vestingContractAddress}

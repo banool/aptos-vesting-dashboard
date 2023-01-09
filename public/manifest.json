@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Aptos Vesting Dashboard",
+  "name": "Aptos Vesting Dashboard",
   "icons": [
     {
       "src": "favicon.ico",

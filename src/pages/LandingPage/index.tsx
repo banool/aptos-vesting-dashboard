@@ -36,15 +36,11 @@ export const LandingPage = () => {
   useEffect(() => {
     let paramUpdate: any = {};
     if (isValidAccountAddress(vestingContractAddress)) {
-      console.log("vestingContractAddress", vestingContractAddress);
       paramUpdate.vesting_contract_address = vestingContractAddress;
     }
-    console.log("beneficiaryAddress", beneficiaryAddress);
     if (isValidAccountAddress(beneficiaryAddress)) {
       paramUpdate.beneficiary_address = beneficiaryAddress;
-      console.log("beneficiaryAddress", beneficiaryAddress);
     }
-    console.log("new params", paramUpdate);
     setSearchParams((prev) => {
       return { ...prev, ...paramUpdate };
     });

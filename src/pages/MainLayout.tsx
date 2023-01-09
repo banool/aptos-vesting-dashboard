@@ -18,7 +18,7 @@ export default function MainLayout({ children }: LayoutProps) {
     headerMiddle = <Text>Loading APT price...</Text>;
   }
   if (aptToUsd) {
-    headerMiddle = <Text>{`1 APT = ${aptToUsd} USD`}</Text>;
+    headerMiddle = <Text>{`1 APT = ${aptToUsd.toFixed(2)} USD`}</Text>;
   }
   if (!isLoading && aptToUsd === undefined) {
     headerMiddle = <Text>Error loading APT price, see console logs</Text>;

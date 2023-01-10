@@ -190,7 +190,14 @@ export function divideManyTimes(
   return out;
 }
 
-export function formatUsdAmount(usdAmount: number): string {
+export function formatAptAmount(aptAmount: number | bigint): string {
+  return `${aptAmount.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })} APT`;
+}
+
+export function formatUsdAmount(usdAmount: number | bigint): string {
   return `$${usdAmount.toLocaleString(undefined, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,

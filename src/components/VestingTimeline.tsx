@@ -1,9 +1,5 @@
 import { useGetAptToUsd } from "../api/hooks/useGetAptToUsd";
-import {
-  divideManyTimes,
-  formatUsdAmount,
-  numberToFractionString,
-} from "../utils";
+import { formatUsdAmount, numberToFractionString } from "../utils";
 import { Timeline } from "./Timeline";
 
 export type VestingTimelineItem = {
@@ -71,12 +67,12 @@ export const VestingTimeline = ({
       ? (Number(stakerGrantAmountApt) * item.fraction).toFixed(2)
       : null;
     const fraction = numberToFractionString(item.fraction);
-    let amountString = amountApt !== null ? `${amountApt} APT` : "";
-    if (aptToUsd) {
-      amountString +=
-        amountApt !== null
-          ? ` - ${formatUsdAmount(Number(amountApt) * aptToUsd)}`
-          : "";
+    let amountString = "";
+    if (amountApt !== null) {
+      amountString += `${amountApt} APT`;
+    }
+    if (amountApt !== null && aptToUsd) {
+      amountString += ` - ${formatUsdAmount(Number(amountApt) * aptToUsd)}`;
     }
     timelineItems.push({
       title: fraction,

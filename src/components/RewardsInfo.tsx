@@ -24,12 +24,14 @@ import {
   getShortAddress,
   formatAptAmount,
   octaToApt,
+  formatUsdAmount,
 } from "../utils";
 import { EquationEvaluate, defaultErrorHandler } from "react-equation";
 import { useCallback, useState } from "react";
 import React from "react";
 import { useEffect } from "react";
 import "../styles/equation.css";
+import { useGetAptToUsd } from "../api/hooks/useGetAptToUsd";
 
 export type RewardsInfoProps = {
   // This is not the beneficiary address, but the staker address resolved from it.
@@ -57,6 +59,8 @@ export const RewardsInfo = ({
     stakePoolAddress,
     "0x1::stake::StakePool",
   );
+
+  const { aptToUsd } = useGetAptToUsd();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -128,10 +132,15 @@ export const RewardsInfo = ({
 
   if (equationState !== null) {
     console.log("equationState", equationState);
+    const value = equationState.result.value;
+    let amountString = formatAptAmount(value);
+    if (aptToUsd) {
+      amountString += ` (${formatUsdAmount(value * aptToUsd)})`;
+    }
     amountComponent = (
       <>
         <Text pt="2" fontSize="sm">
-          <strong>Amount:</strong> {formatAptAmount(equationState.result.value)}
+          <strong>Amount:</strong> {amountString}
         </Text>
       </>
     );

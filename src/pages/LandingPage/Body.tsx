@@ -4,7 +4,7 @@ import { useGetAptToUsd } from "../../api/hooks/useGetAptToUsd";
 import { RewardsInfo } from "../../components/RewardsInfo";
 import { VestingContractInfo } from "../../components/VestingContractInfo";
 import { VestingTimeline } from "../../components/VestingTimeline";
-import { formatUsdAmount, octaToApt } from "../../utils";
+import { formatAptAmount, formatUsdAmount, octaToApt } from "../../utils";
 
 type BodyProps = {
   vestingContractAddress: string;
@@ -42,7 +42,7 @@ export const Body = ({
     );
   }
 
-  if (accountResource === undefined) {
+  if (accountResource === undefined || accountResource.data === undefined) {
     return (
       <Text p={6} textAlign={"center"}>
         Resource unexpectedly undefined
@@ -86,7 +86,7 @@ export const Body = ({
 
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-  const stakingPoolAddress: string | undefined = data.staking.pool_address;
+  const stakePoolAddress: string | undefined = data.staking.pool_address;
 
   let stakerGrantTotalComponent = null;
   if (stakerGrantAmountApt) {
@@ -96,7 +96,9 @@ export const Body = ({
     }
     stakerGrantTotalComponent = (
       <Text textAlign={"center"} paddingBottom={5} paddingTop={2}>
-        {`There is ${stakerGrantAmountApt} APT${usdText} total in this vesting contract for the given beneficiary address.`}
+        {`There is ${formatAptAmount(
+          stakerGrantAmountApt,
+        )} ${usdText} total in this vesting contract for the given beneficiary address.`}
       </Text>
     );
   }
@@ -109,7 +111,7 @@ export const Body = ({
         </Text>
       </Center>
       <Flex>
-        <Box w={"33%"} p={5}>
+        <Box w={"10%"} p={5}>
           <Heading p={5} textAlign={"center"}>
             Vesting Schedule
           </Heading>
@@ -119,7 +121,7 @@ export const Body = ({
             stakerGrantAmountApt={stakerGrantAmountApt}
           />
         </Box>
-        <Box w={"33%"} p={5}>
+        <Box w={"10%"} p={5}>
           <Heading p={5} textAlign={"center"}>
             Vesting Contract
           </Heading>
@@ -130,10 +132,12 @@ export const Body = ({
           <Heading p={5} textAlign={"center"}>
             Beneficiary Info
           </Heading>
-          {stakerGrantAmountApt ? (
+          {stakerGrantAmountApt !== null ? (
             <>
               <Text textAlign={"center"} paddingBottom={5} paddingTop={2}>
-                {`There is ${stakerGrantAmountApt} APT (${formatUsdAmount(
+                {`There is ${formatAptAmount(
+                  stakerGrantAmountApt,
+                )} (${formatUsdAmount(
                   stakerGrantAmountUsd!,
                 )}) total in this vesting contract for the given beneficiary address.`}
               </Text>
@@ -145,13 +149,14 @@ export const Body = ({
             </Text>
           ) : null}
         </Box>
-        <Box w={"33%"} p={5}>
+        <Box w={"80%"} p={5}>
           <Heading p={5} textAlign={"center"}>
             Rewards
           </Heading>
-          {stakingPoolAddress ? (
+          {stakePoolAddress ? (
             <RewardsInfo
-              stakingPoolAddress={stakingPoolAddress}
+              stakerAddress={stakerAccountAddress}
+              stakePoolAddress={stakePoolAddress}
               vestingContractData={data}
             />
           ) : null}

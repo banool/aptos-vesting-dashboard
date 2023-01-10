@@ -111,7 +111,7 @@ export const Body = ({
         </Text>
       </Center>
       <Flex>
-        <Box w={"10%"} p={5}>
+        <Box w={"33%"} p={5}>
           <Heading p={5} textAlign={"center"}>
             Vesting Schedule
           </Heading>
@@ -121,7 +121,7 @@ export const Body = ({
             stakerGrantAmountApt={stakerGrantAmountApt}
           />
         </Box>
-        <Box w={"10%"} p={5}>
+        <Box w={"33%"} p={5}>
           <Heading p={5} textAlign={"center"}>
             Vesting Contract
           </Heading>
@@ -149,7 +149,7 @@ export const Body = ({
             </Text>
           ) : null}
         </Box>
-        <Box w={"80%"} p={5}>
+        <Box w={"33%"} p={5}>
           <Heading p={5} textAlign={"center"}>
             Rewards
           </Heading>

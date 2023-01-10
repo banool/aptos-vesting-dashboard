@@ -25,8 +25,9 @@ import {
   octaToApt,
 } from "../utils";
 import { EquationEvaluate, defaultErrorHandler } from "react-equation";
-import { RefObject, useCallback, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import React from "react";
+import { useEffect } from "react";
 
 export type RewardsInfoProps = {
   // This is not the beneficiary address, but the staker address resolved from it.
@@ -55,7 +56,26 @@ export const RewardsInfo = ({
     "0x1::stake::StakePool",
   );
 
-  const equationRef = useRef<any>();
+  // const equationRef = useRef<any>();
+  const [equationState, setEquationState] = useState<any>(null);
+
+  const equationRef = useCallback(
+    (newState: any) => {
+      if (newState !== null) {
+        // Don't set the equation state again if there is already a matching one.
+        if (equationState !== null && equationState.value === newState.value) {
+          return;
+        }
+        setEquationState(newState);
+      }
+    },
+    [equationState],
+  );
+
+  // If the stakerAddress changes, clear the equation state.
+  useEffect(() => {
+    setEquationState(null);
+  }, [stakerAddress]);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -94,35 +114,23 @@ export const RewardsInfo = ({
   let equationComponent = null;
   if (stakerAddress !== null) {
     equationComponent = (
-      <Box minW="100%" border={2} borderColor={"black"} bg="red">
-        <RewardsEquation
-          ref={equationRef}
-          vestingContractData={vestingContractData}
-          stakePoolData={data}
-          stakerAddress={stakerAddress}
-        />
-      </Box>
+      <RewardsEquation
+        ref={equationRef}
+        vestingContractData={vestingContractData}
+        stakePoolData={data}
+        stakerAddress={stakerAddress}
+      />
     );
-    console.log("eq ref", equationRef);
-    console.log("eq refffffffffff", equationRef.current);
-    // TODO: Figure out why this takes so long to show the value from the equation, it
-    // takes like 5 seconds for the ref value to stop being undefined.
-    if (equationRef.current !== undefined && equationRef.current !== null) {
-      console.log("eq ref current", equationRef.current.current);
-      amountComponent = (
-        <>
-          <Text pt="2" fontSize="sm">
-            <strong>Amount:</strong>{" "}
-            {formatAptAmount(equationRef.current.result.value)}
-          </Text>
-          <Center>
-            <Button marginTop={6} marginBottom={3} onClick={onOpen}>
-              View Equation
-            </Button>
-          </Center>
-        </>
-      );
-    }
+  }
+
+  if (equationState !== null) {
+    amountComponent = (
+      <>
+        <Text pt="2" fontSize="sm">
+          <strong>Amount:</strong> {formatAptAmount(equationState.result.value)}
+        </Text>
+      </>
+    );
   }
 
   return (
@@ -145,67 +153,11 @@ export const RewardsInfo = ({
         </CardBody>
       </Card>
       {equationComponent}
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Upcoming Rewards</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody></ModalBody>
-        </ModalContent>
-      </Modal>
     </>
   );
 };
 
 // Builds the params with everything converted from OCTA to APT.
-function buildEquationParams(
-  vestingContractData: any,
-  stakePoolData: any,
-  stakerAddress: string,
-): any | undefined {
-  // First, make sure the staker address can actually be found.
-  const shareholderShareAmountRaw =
-    vestingContractData.grant_pool.shares.data.find(
-      (item: any) => item.key === stakerAddress,
-    );
-  if (shareholderShareAmountRaw === undefined) {
-    return undefined;
-  }
-  // Build the params.
-  const params = {
-    remainingGrant: {
-      type: "number",
-      value: Number(octaToApt(BigInt(vestingContractData.remaining_grant))),
-    },
-    active: {
-      type: "number",
-      value: Number(octaToApt(BigInt(stakePoolData.active.value))),
-    },
-    commissionRate: {
-      type: "number",
-      value: Number(vestingContractData.staking.commission_percentage),
-    },
-    shareholderShareAmount: {
-      type: "number",
-      value: Number(
-        octaToApt(
-          BigInt(
-            vestingContractData.grant_pool.shares.data.find(
-              (item: any) => item.key === stakerAddress,
-            )?.value,
-          ),
-        ),
-      ),
-    },
-    originalGrantAmount: {
-      type: "number",
-      value: Number(
-        octaToApt(BigInt(vestingContractData.grant_pool.total_coins)),
-      ),
-    },
-  };
-  return params;
-}
 
 export type RewardsEquationProps = {
   vestingContractData: any;
@@ -215,11 +167,61 @@ export type RewardsEquationProps = {
 
 export const RewardsEquation = React.forwardRef<any, RewardsEquationProps>(
   ({ vestingContractData, stakePoolData, stakerAddress }, ref) => {
+    function buildEquationParams(
+      vestingContractData: any,
+      stakePoolData: any,
+      stakerAddress: string,
+    ): any | undefined {
+      // First, make sure the staker address can actually be found.
+      const shareholderShareAmountRaw =
+        vestingContractData.grant_pool.shares.data.find(
+          (item: any) => item.key === stakerAddress,
+        );
+      if (shareholderShareAmountRaw === undefined) {
+        return undefined;
+      }
+      // Build the params.
+      const params = {
+        remainingGrant: {
+          type: "number",
+          value: Number(octaToApt(BigInt(vestingContractData.remaining_grant))),
+        },
+        active: {
+          type: "number",
+          value: Number(octaToApt(BigInt(stakePoolData.active.value))),
+        },
+        commissionRate: {
+          type: "number",
+          value: Number(vestingContractData.staking.commission_percentage),
+        },
+        shareholderShareAmount: {
+          type: "number",
+          value: Number(
+            octaToApt(
+              BigInt(
+                vestingContractData.grant_pool.shares.data.find(
+                  (item: any) => item.key === stakerAddress,
+                )?.value,
+              ),
+            ),
+          ),
+        },
+        originalGrantAmount: {
+          type: "number",
+          value: Number(
+            octaToApt(BigInt(vestingContractData.grant_pool.total_coins)),
+          ),
+        },
+      };
+      return params;
+    }
+
     const params = buildEquationParams(
       vestingContractData,
       stakePoolData,
       stakerAddress,
     );
+
     if (params === undefined) {
       return null;
     }

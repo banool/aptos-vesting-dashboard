@@ -5,15 +5,8 @@ import {
   CardBody,
   Stack,
   StackDivider,
-  Button,
   useDisclosure,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalCloseButton,
-  Center,
+  VStack,
   Flex,
 } from "@chakra-ui/react";
 import { useGetAccountResource } from "../api/hooks/useGetAccountResource";
@@ -24,7 +17,11 @@ import {
   formatAptAmount,
   octaToApt,
 } from "../utils";
-import { EquationEvaluate, defaultErrorHandler } from "react-equation";
+import {
+  EquationEvaluate,
+  Equation,
+  defaultErrorHandler,
+} from "react-equation";
 import { useCallback, useState } from "react";
 import React from "react";
 import { useEffect } from "react";
@@ -124,6 +121,7 @@ export const RewardsInfo = ({
   }
 
   if (equationState !== null) {
+    console.log("equationState", equationState);
     amountComponent = (
       <>
         <Text pt="2" fontSize="sm">
@@ -230,18 +228,40 @@ export const RewardsEquation = React.forwardRef<any, RewardsEquationProps>(
     // https://github.com/banool/aptos-vesting-dashboard/issues/10.
     const equation =
       "\
-    (active - remainingGrant) * ((100 - commissionRate) / 100) * \
-    shareholderShareAmount / originalGrantAmount\
-  ";
+      (active - remainingGrant) * ((100 - commissionRate) / 100) * \
+      shareholderShareAmount / originalGrantAmount\
+    ";
 
+    // TODO: This is sorta jank, maybe there is a better way to do it.
+    let equationWithValues = equation;
+    for (const [key, value] of Object.entries(params)) {
+      equationWithValues = equationWithValues.replace(
+        key,
+        (value as any).value,
+      );
+    }
+
+    // Show both the equation with the variables and a version with the variables
+    // replaced by their values.
     return (
-      <EquationEvaluate
-        ref={ref}
-        decimals={{ type: "fixed", digits: 2 }}
-        value={equation}
-        variables={params}
-        errorHandler={defaultErrorHandler}
-      />
+      <Flex direction={"column"}>
+        <Box p={10}>
+          <EquationEvaluate
+            ref={ref}
+            decimals={{ type: "fixed", digits: 2 }}
+            value={equation}
+            variables={params}
+            errorHandler={defaultErrorHandler}
+          />
+        </Box>
+        <Box p={10}>
+          <EquationEvaluate
+            decimals={{ type: "fixed", digits: 2 }}
+            value={equationWithValues}
+            errorHandler={defaultErrorHandler}
+          />
+        </Box>
+      </Flex>
     );
   },
 );

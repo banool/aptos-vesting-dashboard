@@ -84,8 +84,6 @@ export const Body = ({
     ";
   }
 
-  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
   const stakePoolAddress: string | undefined = data.staking.pool_address;
 
   let stakerGrantTotalComponent = null;
@@ -103,13 +101,10 @@ export const Body = ({
     );
   }
 
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
   return (
     <Box>
-      <Center>
-        <Text p={3} textAlign={"center"}>
-          All timestamps relative to {tz}.
-        </Text>
-      </Center>
       <Flex>
         <Box w={"33%"} p={5}>
           <Heading p={5} textAlign={"center"}>
@@ -135,11 +130,11 @@ export const Body = ({
           {stakerGrantAmountApt !== null ? (
             <>
               <Text textAlign={"center"} paddingBottom={5} paddingTop={2}>
-                {`There is ${formatAptAmount(
-                  stakerGrantAmountApt,
-                )} (${formatUsdAmount(
-                  stakerGrantAmountUsd!,
-                )}) total in this vesting contract for the given beneficiary address.`}
+                {`There is ${formatAptAmount(stakerGrantAmountApt)} (${
+                  stakerGrantAmountUsd !== null
+                    ? formatUsdAmount(stakerGrantAmountUsd!)
+                    : ""
+                }) total in this vesting contract for the given beneficiary address.`}
               </Text>
             </>
           ) : null}
@@ -148,6 +143,14 @@ export const Body = ({
               {additionalInfoMessage}
             </Text>
           ) : null}
+          <Heading p={5} textAlign={"center"}>
+            Timestamps
+          </Heading>
+          <Center>
+            <Text p={3} textAlign={"center"}>
+              All timestamps are relative to {tz}.
+            </Text>
+          </Center>
         </Box>
         <Box w={"33%"} p={5}>
           <Heading p={5} textAlign={"center"}>

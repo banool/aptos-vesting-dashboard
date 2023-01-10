@@ -5,6 +5,7 @@ import {
   CardBody,
   Stack,
   StackDivider,
+  Center,
 } from "@chakra-ui/react";
 import { getShortAddress, useBuildExplorerUrl } from "../utils";
 

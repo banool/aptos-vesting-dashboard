@@ -6,8 +6,16 @@ import {
   Stack,
   StackDivider,
   useDisclosure,
-  VStack,
   Flex,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  Button,
+  Center,
 } from "@chakra-ui/react";
 import { useGetAccountResource } from "../api/hooks/useGetAccountResource";
 import {
@@ -17,14 +25,11 @@ import {
   formatAptAmount,
   octaToApt,
 } from "../utils";
-import {
-  EquationEvaluate,
-  Equation,
-  defaultErrorHandler,
-} from "react-equation";
+import { EquationEvaluate, defaultErrorHandler } from "react-equation";
 import { useCallback, useState } from "react";
 import React from "react";
 import { useEffect } from "react";
+import "../styles/equation.css";
 
 export type RewardsInfoProps = {
   // This is not the beneficiary address, but the staker address resolved from it.
@@ -53,6 +58,8 @@ export const RewardsInfo = ({
     "0x1::stake::StakePool",
   );
 
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
   // const equationRef = useRef<any>();
   const [equationState, setEquationState] = useState<any>(null);
 
@@ -73,8 +80,6 @@ export const RewardsInfo = ({
   useEffect(() => {
     setEquationState(null);
   }, [stakerAddress]);
-
-  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const explorerUrl = useBuildExplorerUrl(stakePoolAddress);
 
@@ -109,6 +114,7 @@ export const RewardsInfo = ({
 
   let amountComponent = null;
   let equationComponent = null;
+  let equationButton = null;
   if (stakerAddress !== null) {
     equationComponent = (
       <RewardsEquation
@@ -129,8 +135,19 @@ export const RewardsInfo = ({
         </Text>
       </>
     );
+    equationButton = (
+      <Center>
+        <Button margin={5} onClick={onOpen}>
+          Show Equations
+        </Button>
+      </Center>
+    );
   }
 
+  // You'll see that when the modal is closed, we render the equation as hidden.
+  // This is a gross hack but we need to render the equation in order to calculate
+  // the value, which causes the amount to show, which then shows the equation
+  // button. Yeah...
   return (
     <>
       <Card margin={3}>
@@ -150,7 +167,21 @@ export const RewardsInfo = ({
           </Stack>
         </CardBody>
       </Card>
-      {equationComponent}
+      {equationButton}
+      {isOpen ? null : <Box hidden={true}>{equationComponent}</Box>}
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent minW={1050}>
+          <ModalHeader>Rewards</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Center>{equationComponent}</Center>
+          </ModalBody>
+          <ModalFooter>
+            <Button onClick={onClose}>Close</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </>
   );
 };
@@ -242,24 +273,29 @@ export const RewardsEquation = React.forwardRef<any, RewardsEquationProps>(
     }
 
     // Show both the equation with the variables and a version with the variables
-    // replaced by their values.
+    // replaced by their values. This class name is necessary to fix this:
+    // https://github.com/kgram/react-equation/issues/28
     return (
-      <Flex direction={"column"}>
+      <Flex direction={"column"} className="myequation">
         <Box p={10}>
-          <EquationEvaluate
-            ref={ref}
-            decimals={{ type: "fixed", digits: 2 }}
-            value={equation}
-            variables={params}
-            errorHandler={defaultErrorHandler}
-          />
+          <Center>
+            <EquationEvaluate
+              ref={ref}
+              decimals={{ type: "fixed", digits: 2 }}
+              value={equation}
+              variables={params}
+              errorHandler={defaultErrorHandler}
+            />
+          </Center>
         </Box>
         <Box p={10}>
-          <EquationEvaluate
-            decimals={{ type: "fixed", digits: 2 }}
-            value={equationWithValues}
-            errorHandler={defaultErrorHandler}
-          />
+          <Center>
+            <EquationEvaluate
+              decimals={{ type: "fixed", digits: 2 }}
+              value={equationWithValues}
+              errorHandler={defaultErrorHandler}
+            />
+          </Center>
         </Box>
       </Flex>
     );

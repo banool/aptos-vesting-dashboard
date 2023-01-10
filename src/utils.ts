@@ -1,5 +1,6 @@
 import { Types } from "aptos";
 import fractionUnicode from "fraction-unicode";
+import { useGlobalState } from "./GlobalState";
 
 /**
  * Helper function for exhaustiveness checks.
@@ -194,4 +195,12 @@ export function formatUsdAmount(usdAmount: number): string {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;
+}
+
+// Builds a link to the account page of the explorer for the given address.
+export function useBuildExplorerUrl(accountAddress: string): string {
+  const [state, _setState] = useGlobalState();
+  const networkParam =
+    state.network_name === "mainnet" ? "" : `?network=${state.network_name}`;
+  return `https://explorer.aptoslabs.com/account/${accountAddress}${networkParam}`;
 }

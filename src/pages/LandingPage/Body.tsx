@@ -150,7 +150,10 @@ export const Body = ({
             Rewards
           </Heading>
           {stakingPoolAddress ? (
-            <RewardsInfo stakingPoolAddress={stakingPoolAddress} />
+            <RewardsInfo
+              stakingPoolAddress={stakingPoolAddress}
+              vestingContractData={data}
+            />
           ) : null}
         </Box>
       </Flex>

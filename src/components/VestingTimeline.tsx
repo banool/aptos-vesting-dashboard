@@ -72,8 +72,11 @@ export const VestingTimeline = ({
       : null;
     const fraction = numberToFractionString(item.fraction);
     let amountString = amountApt !== null ? `${amountApt} APT` : "";
-    if (aptToUsd !== undefined) {
-      amountString += ` - ${formatUsdAmount(Number(amountApt) * aptToUsd)}`;
+    if (aptToUsd) {
+      amountString +=
+        amountApt !== null
+          ? ` - ${formatUsdAmount(Number(amountApt) * aptToUsd)}`
+          : "";
     }
     timelineItems.push({
       title: fraction,

@@ -1,24 +1,17 @@
 import {
   Box,
-  SimpleGrid,
-  Text,
   Table,
   Thead,
   Tbody,
-  Tfoot,
   Tr,
   Th,
-  Td,
-  TableCaption,
   TableContainer,
-  Input,
-  Flex,
-  Center,
   Tooltip,
+  Button,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useGetAccountResource } from "../../api/hooks/useGetAccountResource";
+import { RowElement } from "./RowElement";
 
 type BodyProps = {};
 
@@ -27,6 +20,7 @@ export const Body = ({}: BodyProps) => {
 
   const [addresses, updateAddresses] = useState<string[]>([]);
 
+  // Set the addresses based on the query params.
   useEffect(() => {
     const vestingContractAddressRaw = searchParams.get(
       "vesting_contract_addresses",
@@ -36,13 +30,10 @@ export const Body = ({}: BodyProps) => {
     }
   }, [searchParams]);
 
-  const handleOnInputPaste = (event: any) => {
-    event.preventDefault();
-    const pasted = event.clipboardData.getData("text/plain");
-    const newAddresses = pasted.split(/[\s,\n]+/);
-    updateAddresses(newAddresses);
-    updateAddressQueryParams(newAddresses);
-  };
+  // Update the query params based on changes to the addresses.
+  useEffect(() => {
+    updateAddressQueryParams(addresses);
+  }, [addresses, updateAddresses]);
 
   const updateAddressQueryParams = (newAddresses: string[]) => {
     let paramUpdate: any = {};
@@ -54,49 +45,45 @@ export const Body = ({}: BodyProps) => {
     });
   };
 
-  const getRowElement = (value: string, index: number) => {
-    const onPaste = index === 0 ? handleOnInputPaste : undefined;
-    return (
-      <Tr key={index}>
-        <Td>
-          <Input
-            minW="650px"
-            value={value}
-            onPaste={onPaste}
-            onChange={(event) => {
-              updateAddresses((addresses) => {
-                let newAddresses = [...addresses];
-                // Handle removing an item if the address is changed to an empty string.
-                if (event.target.value === "") {
-                  newAddresses.splice(index, 1);
-                } else {
-                  newAddresses[index] = event.target.value;
-                }
-                updateAddressQueryParams(newAddresses);
-                return newAddresses;
-              });
-            }}
-            placeholder="0x96daeefd..."
-          />
-        </Td>
-        <Td>✅</Td>
-        <Td>✅</Td>
-        <Td>✅</Td>
-      </Tr>
-    );
-  };
-
   // Create rows for each address.
   let rows = addresses.map((address, index) => {
-    return getRowElement(address, index);
+    return (
+      <RowElement
+        key={index}
+        address={address}
+        updateAddresses={updateAddresses}
+        index={index}
+      />
+    );
   });
 
   // Create an additional row for further input.
-  rows.push(getRowElement("", addresses.length));
+  rows.push(
+    <RowElement
+      key={addresses.length}
+      address={""}
+      updateAddresses={updateAddresses}
+      index={addresses.length}
+    />,
+  );
+
+  let clearButton = null;
+  if (addresses.length > 0) {
+    clearButton = (
+      <Button
+        onClick={() => {
+          updateAddresses([]);
+          updateAddressQueryParams([]);
+        }}
+      >
+        Clear
+      </Button>
+    );
+  }
 
   return (
-    <Flex>
-      <TableContainer p={4} minW={"80%"}>
+    <Box>
+      <TableContainer p={4} w="100%">
         <Table variant="simple">
           <Thead>
             <Tr>
@@ -106,7 +93,7 @@ export const Body = ({}: BodyProps) => {
                   label="If you have many vesting contracts in your clipboard (one per line / space separated / comma separated) you can paste them into the first input field below and it'll expand out automatically."
                   placement="auto"
                 >
-                  ℹ️
+                  ⓘ
                 </Tooltip>
               </Th>
               <Th>
@@ -115,7 +102,7 @@ export const Body = ({}: BodyProps) => {
                   label="Whether a vest event has occured but the coins have not been unlocked yet."
                   placement="auto"
                 >
-                  ℹ️
+                  ⓘ
                 </Tooltip>
               </Th>
               <Th>
@@ -124,7 +111,7 @@ export const Body = ({}: BodyProps) => {
                   label="Whether any staking rewards are unlockable but have not been unlocked yet."
                   placement="auto"
                 >
-                  ℹ️
+                  ⓘ
                 </Tooltip>
               </Th>
               <Th>
@@ -133,7 +120,7 @@ export const Body = ({}: BodyProps) => {
                   label="Whether any coins have been unlocked but have not been distributed yet."
                   placement="auto"
                 >
-                  ℹ️
+                  ⓘ
                 </Tooltip>
               </Th>
             </Tr>
@@ -143,9 +130,7 @@ export const Body = ({}: BodyProps) => {
           </Tbody>
         </Table>
       </TableContainer>
-      <Box p={4} paddingTop={12}>
-        <Text>{"hey"}</Text>
-      </Box>
-    </Flex>
+      {clearButton}
+    </Box>
   );
 };

@@ -4,6 +4,10 @@ import * as ReactDOM from "react-dom/client";
 import { App } from "./App";
 import reportWebVitals from "./reportWebVitals";
 import * as serviceWorker from "./serviceWorker";
+import { AptosWalletAdapterProvider } from "@aptos-labs/wallet-adapter-react";
+import { PetraWallet } from "petra-plugin-wallet-adapter";
+
+const wallets = [new PetraWallet()];
 
 const container = document.getElementById("root");
 if (!container) throw new Error("Failed to find the root element");
@@ -11,8 +15,10 @@ const root = ReactDOM.createRoot(container);
 
 root.render(
   <React.StrictMode>
-    <ColorModeScript />
-    <App />
+    <AptosWalletAdapterProvider plugins={wallets} autoConnect={true}>
+      <ColorModeScript />
+      <App />
+    </AptosWalletAdapterProvider>
   </React.StrictMode>,
 );
 

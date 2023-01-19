@@ -3,6 +3,7 @@ import { Box, Flex, Heading, IconButton, Spacer, Text } from "@chakra-ui/react";
 import { ColorModeSwitcher } from "../components/ColorModeSwitcher";
 import NetworkSelect from "../components/NetworkSelect";
 import { useGetAptToUsd } from "../api/hooks/useGetAptToUsd";
+import Nav from "./Nav";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -33,6 +34,8 @@ export default function MainLayout({ children }: LayoutProps) {
           <Box>
             <Heading size="md">Aptos Vesting Dashboard</Heading>
           </Box>
+          {" · "}
+          <Nav />
           <Spacer />
           {headerMiddle}
           <Spacer />

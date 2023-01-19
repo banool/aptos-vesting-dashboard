@@ -1,25 +1,26 @@
-import { Route, Routes } from "react-router-dom";
-import { InteractPage } from "./pages/InteractPage";
-import { LandingPage } from "./pages/LandingPage";
+import { Navigate, Route, Routes } from "react-router-dom";
+import { TransactPage } from "./pages/TransactPage";
+import { ExplorePage } from "./pages/ExplorePage";
 import MainLayout from "./layouts/MainLayout";
 import { NotFoundPage } from "./pages/NotFoundPage";
 
 export default function MyRoutes() {
   return (
     <Routes>
+      <Route path="/" element={<Navigate to="/explore" replace />} />
       <Route
-        path="/"
+        path="/explore"
         element={
           <MainLayout>
-            <LandingPage />
+            <ExplorePage />
           </MainLayout>
         }
       />
       <Route
-        path="/interact"
+        path="/transact"
         element={
           <MainLayout>
-            <InteractPage />
+            <TransactPage />
           </MainLayout>
         }
       />

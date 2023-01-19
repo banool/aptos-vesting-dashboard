@@ -12,7 +12,7 @@ import { useSearchParams } from "react-router-dom";
 import { isValidAccountAddress } from "../../utils";
 import { Body } from "./Body";
 
-export const LandingPage = () => {
+export const ExplorePage = () => {
   const [vestingContractAddress, updateVestingContractAddress] = useState("");
   const [beneficiaryAddress, updateBeneficiaryAddress] = useState("");
 

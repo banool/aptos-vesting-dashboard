@@ -1,11 +1,24 @@
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
-import { Box, Center, Text, Flex, Spacer } from "@chakra-ui/react";
+import {
+  Box,
+  Center,
+  Text,
+  Flex,
+  Spacer,
+  FormControl,
+  FormLabel,
+  Switch,
+  Checkbox,
+} from "@chakra-ui/react";
+import { useState } from "react";
 import { ConnectWalletComponent } from "../../components/ConnectWalletComponent";
 import { DisconnectWalletComponent } from "../../components/DisconnectWalletComponent";
 import { Body } from "./Body";
 
-export const InteractPage = () => {
+export const TransactPage = () => {
   const { connected } = useWallet();
+
+  const [bypassValidation, setBypassValidation] = useState(false);
 
   let walletConnectComponent = null;
   if (connected) {
@@ -20,18 +33,20 @@ export const InteractPage = () => {
     <>
       <Flex p={1} alignContent="center">
         <Spacer />
-        <Box p={4}>{walletConnectComponent}</Box>
         <Center p={4}>
           <Box>{`Timezone: ${tz}`}</Box>
         </Center>
+        <Box p={4}>{walletConnectComponent}</Box>
+        <Checkbox
+          p={4}
+          checked={bypassValidation}
+          onChange={() => setBypassValidation((prev) => !prev)}
+        >
+          Bypass validation
+        </Checkbox>
         <Spacer />
       </Flex>
-      <Center>
-        <Box w="800px" p={2}>
-          <Text textAlign={"center"}>{}</Text>
-        </Box>
-      </Center>
-      <Body />
+      <Body bypassValidation={bypassValidation} />
     </>
   );
 };

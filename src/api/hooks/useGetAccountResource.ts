@@ -4,7 +4,7 @@ import { getAccountResource } from "..";
 import { ResponseError } from "../client";
 import { useGlobalState } from "../../GlobalState";
 
-type useGetAccountResourceResponse = {
+export type useGetAccountResourceResponse = {
   accountResource: Types.MoveResource | undefined;
   isLoading: boolean;
   error: ResponseError | null;

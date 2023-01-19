@@ -34,7 +34,7 @@ export default function MainLayout({ children }: LayoutProps) {
           <Box>
             <Heading size="md">Aptos Vesting Dashboard</Heading>
           </Box>
-          {" · "}
+          <Box paddingLeft={1}>·</Box>
           <Nav />
           <Spacer />
           {headerMiddle}

@@ -127,7 +127,7 @@ export const Body = ({ bypassValidation }: BodyProps) => {
         <Td w="1px">
           <Input
             value={address}
-            minW="650px"
+            minW="675px"
             onPaste={onPaste}
             onChange={(event) => {
               let newAddresses = [...addresses];

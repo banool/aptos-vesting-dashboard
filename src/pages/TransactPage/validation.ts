@@ -3,6 +3,8 @@ import { UseQueryResult } from "react-query";
 import { useGetAccountResourceResponse } from "../../api/hooks/useGetAccountResource";
 import { getDatetimePretty } from "../../utils";
 
+const EPOCH_DURATION_SECS = 2 * 60 * 60;
+
 export type CanCallStatus = "loading" | "canCall" | "cannotCall";
 
 export type CanCallResponse = {
@@ -78,17 +80,29 @@ export const canCallUnlockRewards = (
       .last_reconfiguration_time / 1e6;
   const lockedUntilSecs = (stakePoolResponse.data!.data as any)
     .locked_until_secs;
-  if (lockedUntilSecs > lastEpochConfigurationTimeSecs) {
-    return {
-      canCallStatus: "cannotCall",
-      reason: `The rewards are still locked for this contract, it will unlock at ${getDatetimePretty(
-        lockedUntilSecs,
-      )}.`,
-    };
+  const nowSecs = Math.floor(Date.now() / 1000);
+  if (nowSecs > lockedUntilSecs) {
+    if (lastEpochConfigurationTimeSecs > lockedUntilSecs) {
+      return {
+        canCallStatus: "canCall",
+        reason: "You can unlock rewards 🤠",
+      };
+    } else {
+      const nextEpochSecs =
+        lastEpochConfigurationTimeSecs + EPOCH_DURATION_SECS;
+      return {
+        canCallStatus: "cannotCall",
+        reason: `The next round of rewards are still locked for this contract. We have passed the unlock time but we're still waiting for this epoch to end, which will happen at ${getDatetimePretty(
+          nextEpochSecs,
+        )}.`,
+      };
+    }
   } else {
     return {
-      canCallStatus: "canCall",
-      reason: "You can unlock rewards 🤠",
+      canCallStatus: "cannotCall",
+      reason: `The next round of rewards are still locked for this contract, they will unlock at the start of the next epoch after ${getDatetimePretty(
+        lockedUntilSecs,
+      )}.`,
     };
   }
 };

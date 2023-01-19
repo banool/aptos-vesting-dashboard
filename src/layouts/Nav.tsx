@@ -14,11 +14,7 @@ export default function Nav() {
         Explore
       </Link>
       {" · "}
-      <Link
-        paddingLeft={1}
-        paddingRight={1}
-        onClick={() => navigate("/transact")}
-      >
+      <Link paddingLeft={1} onClick={() => navigate("/transact")}>
         Transact
       </Link>
     </Box>

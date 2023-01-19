@@ -13,6 +13,7 @@ type useGetAccountResourceResponse = {
 export function useGetAccountResource(
   address: string,
   resource: string,
+  options: { enabled?: boolean } = {},
 ): useGetAccountResourceResponse {
   const [state, _setState] = useGlobalState();
 
@@ -23,7 +24,7 @@ export function useGetAccountResource(
         { address, resourceType: resource },
         state.network_value,
       ),
-    { refetchOnWindowFocus: false },
+    { refetchOnWindowFocus: false, enabled: options.enabled },
   );
 
   const { isLoading, error } = accountResourcesResult;

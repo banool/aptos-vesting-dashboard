@@ -1,6 +1,7 @@
 import { Box, Center, Flex, Heading, Text } from "@chakra-ui/react";
 import { useGetAccountResource } from "../../api/hooks/useGetAccountResource";
 import { useGetAptToUsd } from "../../api/hooks/useGetAptToUsd";
+import { useGetUpcomingReward } from "../../api/hooks/useGetUpcomingReward";
 import { RewardsInfo } from "../../components/RewardsInfo";
 import { VestingContractInfo } from "../../components/VestingContractInfo";
 import { VestingTimeline } from "../../components/VestingTimeline";
@@ -19,6 +20,12 @@ export const Body = ({
     vestingContractAddress,
     "0x1::vesting::VestingContract",
   );
+
+  const {
+    data: upcomingRewards,
+    isLoading: upcomingRewardsIsLoading,
+    error: upcomingRewardsError,
+  } = useGetUpcomingReward(vestingContractAddress, beneficiaryAddress);
 
   // I have verified that this only gets called once, even if you use this hook
   // in multiple places throughout the code. There must be some sensible default
@@ -161,6 +168,9 @@ export const Body = ({
               stakerAddress={stakerAccountAddress}
               stakePoolAddress={stakePoolAddress}
               vestingContractData={data}
+              upcomingRewards={upcomingRewards}
+              upcomingRewardsIsLoading={upcomingRewardsIsLoading}
+              upcomingRewardsError={upcomingRewardsError}
             />
           ) : null}
         </Box>

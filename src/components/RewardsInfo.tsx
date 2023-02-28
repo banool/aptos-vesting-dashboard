@@ -32,18 +32,25 @@ import React from "react";
 import { useEffect } from "react";
 import "../styles/equation.css";
 import { useGetAptToUsd } from "../api/hooks/useGetAptToUsd";
+import { useQuery } from "react-query";
 
 export type RewardsInfoProps = {
   // This is not the beneficiary address, but the staker address resolved from it.
   stakerAddress: string | null;
   stakePoolAddress: string;
   vestingContractData: any;
+  upcomingRewards: number | undefined;
+  upcomingRewardsIsLoading: boolean;
+  upcomingRewardsError: any;
 };
 
 export const RewardsInfo = ({
   stakerAddress,
   stakePoolAddress,
   vestingContractData,
+  upcomingRewards,
+  upcomingRewardsIsLoading,
+  upcomingRewardsError,
 }: RewardsInfoProps) => {
   // TODO: This hook can only run based on the output of the previous hook
   // in the parent that fetches the vesting pool info (see that first).
@@ -59,6 +66,10 @@ export const RewardsInfo = ({
     stakePoolAddress,
     "0x1::stake::StakePool",
   );
+
+  console.log("upcomingRewards", upcomingRewards);
+  console.log("upcomingRewardsIsLoading", upcomingRewardsIsLoading);
+  console.log("upcomingRewardsError", upcomingRewardsError);
 
   const { aptToUsd } = useGetAptToUsd();
 

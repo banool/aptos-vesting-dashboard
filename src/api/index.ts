@@ -43,3 +43,18 @@ export function getAccountResource(
     }),
   );
 }
+
+export async function getUpcomingReward(
+  vestingContractAddress: string,
+  beneficiaryAddress: string,
+  nodeUrl: string,
+): Promise<number> {
+  const client = new AptosClient(nodeUrl);
+  const payload: Types.ViewRequest = {
+    function: "0x1::vesting::accumulated_rewards",
+    type_arguments: [],
+    arguments: [vestingContractAddress, beneficiaryAddress],
+  };
+  const response = await client.view(payload);
+  return parseInt(response[0] as any);
+}

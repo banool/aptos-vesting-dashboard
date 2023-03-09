@@ -16,6 +16,7 @@ import {
   ModalCloseButton,
   Button,
   Center,
+  Tooltip,
 } from "@chakra-ui/react";
 import { useGetAccountResource } from "../api/hooks/useGetAccountResource";
 import {
@@ -178,10 +179,15 @@ export const RewardsInfo = ({
                 <strong>Staking Pool Address: </strong>
                 <a href={explorerUrl}>{getShortAddress(stakePoolAddress)}</a>
               </Text>
-              <Text pt="2" fontSize="sm">
-                <strong>Next Reward:</strong>{" "}
-                {getDatetimePretty(Number(lockedUntilSecs))}
-              </Text>
+              <Tooltip
+                label="Note: The rewards will not actually be available at this time, but when the next epoch after this time begins (up to 2 hours). See the Transact page for more accurate information if this time has just passed and you're waiting for the next epoch."
+                placement="auto"
+              >
+                <Text pt="2" fontSize="sm">
+                  <strong>Next Reward:</strong>{" "}
+                  {getDatetimePretty(Number(lockedUntilSecs))} <sup>ⓘ</sup>
+                </Text>
+              </Tooltip>
               {amountComponent}
             </Box>
           </Stack>

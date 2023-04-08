@@ -14,7 +14,7 @@ import { Body } from "./Body";
 
 export const ExplorePage = () => {
   const [vestingContractAddress, updateVestingContractAddress] = useState("");
-  const [beneficiaryAddress, updateBeneficiaryAddress] = useState("");
+  const [maybeBeneficiaryAddress, updateMaybeBeneficiaryAddress] = useState("");
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -26,9 +26,9 @@ export const ExplorePage = () => {
     if (vestingContractAddressRaw) {
       updateVestingContractAddress(vestingContractAddressRaw);
     }
-    const beneficiaryAddressRaw = searchParams.get("beneficiary_address");
-    if (beneficiaryAddressRaw) {
-      updateBeneficiaryAddress(beneficiaryAddressRaw);
+    const maybeBeneficiaryAddressRaw = searchParams.get("beneficiary_address");
+    if (maybeBeneficiaryAddressRaw) {
+      updateMaybeBeneficiaryAddress(maybeBeneficiaryAddressRaw);
     }
   }, [searchParams]);
 
@@ -38,15 +38,15 @@ export const ExplorePage = () => {
     if (isValidAccountAddress(vestingContractAddress)) {
       paramUpdate.vesting_contract_address = vestingContractAddress;
     }
-    if (isValidAccountAddress(beneficiaryAddress)) {
-      paramUpdate.beneficiary_address = beneficiaryAddress;
+    if (isValidAccountAddress(maybeBeneficiaryAddress)) {
+      paramUpdate.beneficiary_address = maybeBeneficiaryAddress;
     }
     setSearchParams((prev) => {
       return { ...prev, ...paramUpdate };
     });
   }, [
     vestingContractAddress,
-    beneficiaryAddress,
+    maybeBeneficiaryAddress,
     searchParams,
     setSearchParams,
   ]);
@@ -80,9 +80,9 @@ export const ExplorePage = () => {
             <InputGroup>
               <InputLeftAddon minW="175px" children="Beneficiary" />
               <Input
-                value={beneficiaryAddress}
+                value={maybeBeneficiaryAddress}
                 onChange={(event) =>
-                  updateBeneficiaryAddress(event.target.value)
+                  updateMaybeBeneficiaryAddress(event.target.value)
                 }
                 placeholder="0x96daeefd..."
               />
@@ -98,7 +98,7 @@ export const ExplorePage = () => {
       {isValidAccountAddress(vestingContractAddress) ? (
         <Body
           vestingContractAddress={vestingContractAddress}
-          beneficiaryAddress={beneficiaryAddress}
+          maybeBeneficiaryAddress={maybeBeneficiaryAddress}
         />
       ) : null}
     </Box>

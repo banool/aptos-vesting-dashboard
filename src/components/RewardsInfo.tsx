@@ -26,6 +26,7 @@ import {
   formatAptAmount,
   octaToApt,
   formatUsdAmount,
+  aptToOcta,
 } from "../utils";
 import { EquationEvaluate, defaultErrorHandler } from "react-equation";
 import { useCallback, useState } from "react";
@@ -34,24 +35,20 @@ import { useEffect } from "react";
 import "../styles/equation.css";
 import { useGetAptToUsd } from "../api/hooks/useGetAptToUsd";
 import { useQuery } from "react-query";
+import { useGetUpcomingReward } from "../api/hooks/useGetUpcomingReward";
 
 export type RewardsInfoProps = {
-  // This is not the beneficiary address, but the staker address resolved from it.
-  stakerAddress: string | null;
+  vestingContractAddress: string;
+  beneficiaryAddress: string | undefined;
   stakePoolAddress: string;
   vestingContractData: any;
-  upcomingRewards: number | undefined;
-  upcomingRewardsIsLoading: boolean;
-  upcomingRewardsError: any;
 };
 
 export const RewardsInfo = ({
-  stakerAddress,
+  vestingContractAddress,
+  beneficiaryAddress,
   stakePoolAddress,
   vestingContractData,
-  upcomingRewards,
-  upcomingRewardsIsLoading,
-  upcomingRewardsError,
 }: RewardsInfoProps) => {
   // TODO: This hook can only run based on the output of the previous hook
   // in the parent that fetches the vesting pool info (see that first).
@@ -68,34 +65,15 @@ export const RewardsInfo = ({
     "0x1::stake::StakePool",
   );
 
-  console.log("upcomingRewards", upcomingRewards);
-  console.log("upcomingRewardsIsLoading", upcomingRewardsIsLoading);
-  console.log("upcomingRewardsError", upcomingRewardsError);
+  const {
+    data: upcomingRewards,
+    isLoading: upcomingRewardsIsLoading,
+    error: upcomingRewardsError,
+  } = useGetUpcomingReward(vestingContractAddress, beneficiaryAddress!, {
+    enabled: beneficiaryAddress !== undefined,
+  });
 
   const { aptToUsd } = useGetAptToUsd();
-
-  const { isOpen, onOpen, onClose } = useDisclosure();
-
-  // const equationRef = useRef<any>();
-  const [equationState, setEquationState] = useState<any>(null);
-
-  const equationRef = useCallback(
-    (newState: any) => {
-      if (newState !== null) {
-        // Don't set the equation state again if there is already a matching one.
-        if (equationState !== null && equationState.value === newState.value) {
-          return;
-        }
-        setEquationState(newState);
-      }
-    },
-    [equationState],
-  );
-
-  // If the stakerAddress changes, clear the equation state.
-  useEffect(() => {
-    setEquationState(null);
-  }, [stakerAddress]);
 
   const explorerUrl = useBuildExplorerUrl(stakePoolAddress);
 
@@ -129,22 +107,10 @@ export const RewardsInfo = ({
   const lockedUntilSecs = BigInt(data.locked_until_secs);
 
   let amountComponent = null;
-  let equationComponent = null;
-  let equationButton = null;
-  if (stakerAddress !== null) {
-    equationComponent = (
-      <RewardsEquation
-        ref={equationRef}
-        vestingContractData={vestingContractData}
-        stakePoolData={data}
-        stakerAddress={stakerAddress}
-      />
-    );
-  }
+  if (upcomingRewards !== undefined) {
+    console.log(`Value in OCTA: ${upcomingRewards}`);
 
-  if (equationState !== null) {
-    console.log("equationState", equationState);
-    const value = equationState.result.value;
+    const value = Number(octaToApt(BigInt(upcomingRewards)));
     let amountString = formatAptAmount(value);
     if (aptToUsd) {
       amountString += ` (${formatUsdAmount(value * aptToUsd)})`;
@@ -156,12 +122,15 @@ export const RewardsInfo = ({
         </Text>
       </>
     );
-    equationButton = (
-      <Center>
-        <Button margin={5} onClick={onOpen}>
-          Show Equations
-        </Button>
-      </Center>
+  }
+
+  if (upcomingRewardsError) {
+    amountComponent = (
+      <>
+        <Text pt="2" fontSize="sm">
+          <strong>Amount:</strong> {`Error: ${upcomingRewardsError}`}
+        </Text>
+      </>
     );
   }
 
@@ -193,137 +162,6 @@ export const RewardsInfo = ({
           </Stack>
         </CardBody>
       </Card>
-      {equationButton}
-      {isOpen ? null : <Box hidden={true}>{equationComponent}</Box>}
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent minW={1050}>
-          <ModalHeader>Rewards</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <Center>{equationComponent}</Center>
-          </ModalBody>
-          <ModalFooter>
-            <Button onClick={onClose}>Close</Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
     </>
   );
 };
-
-// Builds the params with everything converted from OCTA to APT.
-
-export type RewardsEquationProps = {
-  vestingContractData: any;
-  stakePoolData: any;
-  stakerAddress: string;
-};
-
-export const RewardsEquation = React.forwardRef<any, RewardsEquationProps>(
-  ({ vestingContractData, stakePoolData, stakerAddress }, ref) => {
-    function buildEquationParams(
-      vestingContractData: any,
-      stakePoolData: any,
-      stakerAddress: string,
-    ): any | undefined {
-      // First, make sure the staker address can actually be found.
-      const shareholderShareAmountRaw =
-        vestingContractData.grant_pool.shares.data.find(
-          (item: any) => item.key === stakerAddress,
-        );
-      if (shareholderShareAmountRaw === undefined) {
-        return undefined;
-      }
-      // Build the params.
-      const params = {
-        remainingGrant: {
-          type: "number",
-          value: Number(octaToApt(BigInt(vestingContractData.remaining_grant))),
-        },
-        active: {
-          type: "number",
-          value: Number(octaToApt(BigInt(stakePoolData.active.value))),
-        },
-        commissionRate: {
-          type: "number",
-          value: Number(vestingContractData.staking.commission_percentage),
-        },
-        shareholderShareAmount: {
-          type: "number",
-          value: Number(
-            octaToApt(
-              BigInt(
-                vestingContractData.grant_pool.shares.data.find(
-                  (item: any) => item.key === stakerAddress,
-                )?.value,
-              ),
-            ),
-          ),
-        },
-        originalGrantAmount: {
-          type: "number",
-          value: Number(
-            octaToApt(BigInt(vestingContractData.grant_pool.total_coins)),
-          ),
-        },
-      };
-      return params;
-    }
-
-    const params = buildEquationParams(
-      vestingContractData,
-      stakePoolData,
-      stakerAddress,
-    );
-
-    if (params === undefined) {
-      return null;
-    }
-
-    // TODO: Factor in what's in flight, step 5 here:
-    // https://github.com/banool/aptos-vesting-dashboard/issues/10.
-    const equation =
-      "\
-      (active - remainingGrant) * ((100 - commissionRate) / 100) * \
-      shareholderShareAmount / originalGrantAmount\
-    ";
-
-    // TODO: This is sorta jank, maybe there is a better way to do it.
-    let equationWithValues = equation;
-    for (const [key, value] of Object.entries(params)) {
-      equationWithValues = equationWithValues.replace(
-        key,
-        (value as any).value,
-      );
-    }
-
-    // Show both the equation with the variables and a version with the variables
-    // replaced by their values. This class name is necessary to fix this:
-    // https://github.com/kgram/react-equation/issues/28
-    return (
-      <Flex direction={"column"} className="myequation">
-        <Box p={10}>
-          <Center>
-            <EquationEvaluate
-              ref={ref}
-              decimals={{ type: "fixed", digits: 2 }}
-              value={equation}
-              variables={params}
-              errorHandler={defaultErrorHandler}
-            />
-          </Center>
-        </Box>
-        <Box p={10}>
-          <Center>
-            <EquationEvaluate
-              decimals={{ type: "fixed", digits: 2 }}
-              value={equationWithValues}
-              errorHandler={defaultErrorHandler}
-            />
-          </Center>
-        </Box>
-      </Flex>
-    );
-  },
-);

@@ -1,7 +1,6 @@
 import { Box, Center, Flex, Heading, Text } from "@chakra-ui/react";
 import { useGetAccountResource } from "../../api/hooks/useGetAccountResource";
 import { useGetAptToUsd } from "../../api/hooks/useGetAptToUsd";
-import { useGetUpcomingReward } from "../../api/hooks/useGetUpcomingReward";
 import { RewardsInfo } from "../../components/RewardsInfo";
 import { VestingContractInfo } from "../../components/VestingContractInfo";
 import { VestingTimeline } from "../../components/VestingTimeline";
@@ -9,23 +8,18 @@ import { formatAptAmount, formatUsdAmount, octaToApt } from "../../utils";
 
 type BodyProps = {
   vestingContractAddress: string;
-  beneficiaryAddress: string;
+  // This could be the beneficiary or the shareholder address.
+  maybeBeneficiaryAddress: string;
 };
 
 export const Body = ({
   vestingContractAddress,
-  beneficiaryAddress,
+  maybeBeneficiaryAddress,
 }: BodyProps) => {
   const { isLoading, accountResource, error } = useGetAccountResource(
     vestingContractAddress,
     "0x1::vesting::VestingContract",
   );
-
-  const {
-    data: upcomingRewards,
-    isLoading: upcomingRewardsIsLoading,
-    error: upcomingRewardsError,
-  } = useGetUpcomingReward(vestingContractAddress, beneficiaryAddress);
 
   // I have verified that this only gets called once, even if you use this hook
   // in multiple places throughout the code. There must be some sensible default
@@ -61,11 +55,16 @@ export const Body = ({
   // contract.
   const data = accountResource.data as any;
 
-  // Determine additional information if a beneficiary address was given.
-  const stakerAccountAddress = beneficiaryAddress
-    ? getStakerAccountAddress(data, beneficiaryAddress)
-    : null;
-  const stakerGrantAmount = getStakerGrantAmount(data, stakerAccountAddress);
+  // If the beneficiary address doesn't resolve to a different addess for the
+  // shareholder address, the beneficiary address must be the shareholder address.
+  const addresses = getShareholderAndBeneficiaryAccountAddresses(
+    data,
+    maybeBeneficiaryAddress,
+  );
+  const stakerGrantAmount = getStakerGrantAmount(
+    data,
+    addresses?.shareholderAddress,
+  );
   const stakerGrantAmountApt = stakerGrantAmount
     ? octaToApt(stakerGrantAmount)
     : null;
@@ -75,7 +74,7 @@ export const Body = ({
       : null;
 
   let additionalInfoMessage = null;
-  if (beneficiaryAddress === "") {
+  if (maybeBeneficiaryAddress === "") {
     additionalInfoMessage =
       "\
         Enter a beneficiary address to see information about how much will vest \
@@ -84,7 +83,7 @@ export const Body = ({
         out to.\
     ";
   }
-  if (beneficiaryAddress.length > 0 && stakerGrantAmount === null) {
+  if (maybeBeneficiaryAddress.length > 0 && stakerGrantAmount === null) {
     additionalInfoMessage =
       "\
         The given beneficiary address could not be found!\
@@ -165,12 +164,10 @@ export const Body = ({
           </Heading>
           {stakePoolAddress ? (
             <RewardsInfo
-              stakerAddress={stakerAccountAddress}
+              vestingContractAddress={vestingContractAddress}
+              beneficiaryAddress={addresses?.beneficiaryAddress}
               stakePoolAddress={stakePoolAddress}
               vestingContractData={data}
-              upcomingRewards={upcomingRewards}
-              upcomingRewardsIsLoading={upcomingRewardsIsLoading}
-              upcomingRewardsError={upcomingRewardsError}
             />
           ) : null}
         </Box>
@@ -179,12 +176,40 @@ export const Body = ({
   );
 };
 
-// We allow the user to pass in a beneficiary address. This function takes the
-// address they gave and tries to search the beneficiaries map to do a value
-// to key lookup to get the original staker account address, since that is the
-// key used for the grant_pool. If no value -> key map is found, we just return
-// the address given.
-function getStakerAccountAddress(resourceData: any, address: string): string {
+type Addresses = {
+  shareholderAddress: string;
+  beneficiaryAddress: string;
+};
+
+// Given an address (which could be either), return the beneficiary and shareholder
+// address. If the address is not found at all, return null.
+function getShareholderAndBeneficiaryAccountAddresses(
+  resourceData: any,
+  address: string,
+): Addresses | null {
+  const beneficiaries = resourceData.beneficiaries.data;
+  // First look through the beneficiaries map.
+  for (const item of beneficiaries) {
+    if (item.value === address || item.key === address) {
+      return {
+        shareholderAddress: item.key,
+        beneficiaryAddress: item.value,
+      };
+    }
+  }
+  // Now look through the shareholders list.
+  for (const item of resourceData.grant_pool.shareholders) {
+    if (item === address) {
+      return item;
+    }
+  }
+  return null;
+}
+
+function getBeneficiaryAccountAddress(
+  resourceData: any,
+  address: string,
+): string {
   const beneficiaries = resourceData.beneficiaries.data;
   for (const item of beneficiaries) {
     if (item.value === address) {
@@ -196,14 +221,14 @@ function getStakerAccountAddress(resourceData: any, address: string): string {
 
 function getStakerGrantAmount(
   resourceData: any,
-  stakerAddress: string | null,
+  shareholderAccountAddress: string | undefined,
 ): bigint | null {
-  if (stakerAddress === undefined) {
+  if (shareholderAccountAddress === undefined) {
     return null;
   }
   const shares = resourceData.grant_pool.shares.data;
   const amount: string | undefined = shares.find(
-    (item: any) => item.key === stakerAddress,
+    (item: any) => item.key === shareholderAccountAddress,
   )?.value;
   if (amount === undefined) {
     return null;

@@ -80,5 +80,15 @@ export const VestingTimeline = ({
       unixTimeSecs: item.unixTimeSecs,
     });
   }
+
+  // Add periodDuration to the unixtime of every item, vesting doesn't actually start
+  // until the first period has elapsed.
+  timelineItems = timelineItems.map((item) => {
+    return {
+      ...item,
+      unixTimeSecs: item.unixTimeSecs + periodDuration,
+    };
+  });
+
   return <Timeline items={timelineItems} />;
 };

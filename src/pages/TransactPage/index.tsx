@@ -18,7 +18,7 @@ import { Body } from "./Body";
 export const TransactPage = () => {
   const { connected } = useWallet();
 
-  const [bypassValidation, setBypassValidation] = useState(false);
+  const [bypassValidation, setBypassValidation] = useState(true);
 
   let walletConnectComponent = null;
   if (connected) {
@@ -37,6 +37,16 @@ export const TransactPage = () => {
           <Box>{`Timezone: ${tz}`}</Box>
         </Center>
         <Box p={4}>{walletConnectComponent}</Box>
+        <Spacer />
+      </Flex>
+      <Body bypassValidation={bypassValidation} />
+    </>
+  );
+};
+
+/*
+We can add this back if I actually implement proper validation.
+
         <Checkbox
           p={4}
           checked={bypassValidation}
@@ -44,9 +54,4 @@ export const TransactPage = () => {
         >
           Bypass validation
         </Checkbox>
-        <Spacer />
-      </Flex>
-      <Body bypassValidation={bypassValidation} />
-    </>
-  );
-};
+*/

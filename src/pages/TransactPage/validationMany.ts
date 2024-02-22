@@ -8,7 +8,8 @@ const checkBypass = (bypassValidation: boolean): CanCallResponse | null => {
     return {
       canCallStatus: "canCall",
       reason:
-        "Validation bypassed. Be careful, you're entering 🤡 territory, this function might not do anything.",
+        // "Validation bypassed. Be careful, you're entering 🤡 territory, this function might not do anything.",
+        "Validation is not implemented at the moment so the site makes no guarantee that this will do anything!",
     };
   }
   return null;
